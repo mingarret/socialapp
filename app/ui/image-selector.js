@@ -37,7 +37,7 @@ export default function ImageSelector() {
     if (file && file.type.startsWith('image/')) {
       setImgUrl(URL.createObjectURL(file));
     } else {
-      ///alert('Por favor, selecciona un archivo de imagen válido.');
+      alert('Por favor, selecciona un archivo de imagen válido.');
     }
   };
 

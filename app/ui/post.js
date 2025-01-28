@@ -1,47 +1,74 @@
+"use client";
+
 import Image from "next/image";
-import { HeartIcon, ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { HeartIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-const Post = ({ content, url, avatarUrl = "/default-avatar.jpg", likes = 1234 }) => {
-  const handleLike = () => {
-    console.log("Post liked!");
-    // Aquí podrías implementar la lógica de actualización de "likes"
-  };
+export default function Post({ content, url }) {
+  const [isOpen, setIsOpen] = useState(false); // Estado para abrir/cerrar el modal
 
   return (
-    <div className="max-w-sm mx-auto bg-white border border-gray-300 rounded-lg shadow-md">
-      <div className="flex items-center p-4">
-        <Image
-          src={avatarUrl}
-          alt="User avatar"
-          width={40}
-          height={40}
-          className="rounded-full"
-        />
-        <div className="ml-3">
-          <p className="font-bold">Mondongo</p>
-        </div>
-      </div>
-      <Image
-        src={url}
-        alt="Post image"
-        width={500}
-        height={500}
-        className="w-full h-auto object-cover"
-      />
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex space-x-4">
-           
+    <>
+      {/* 📌 Post principal */}
+      <div className="flex flex-col gap-3 max-w-md bg-white p-4 rounded-lg shadow-md">
+        {/* 🧑‍💻 Usuario */}
+        <div className="flex items-center gap-3">
+          <Image src="/Children of Morta.jpg" alt="avatar" width={32} height={32} className="rounded-full" />
+          <div className="flex flex-col">
+            <span className="font-bold text-sm">Ximo</span>
+            <span className="text-xs text-gray-500">1 día</span>
           </div>
         </div>
-        <p className="mt-2 text-gray-700">{likes} Me gusta</p>
-        <p className="mt-2 text-gray-700">
-          <span className="font-bold">Ximo</span> {content}
-        </p>
-      </div>
-    </div>
-  );
-};
 
-export default Post;
+        {/* 📸 Imagen del post con efecto lupa */}
+        <div className="overflow-hidden rounded-lg cursor-zoom-in" onClick={() => setIsOpen(true)}>
+          <Image 
+            src={url} 
+            alt="post" 
+            width={448} 
+            height={448} 
+            className="rounded-lg object-cover hover:scale-105 transition-transform"
+          />
+        </div>
+
+        {/* ❤️ Iconos de Interacción */}
+        <div className="flex justify-between items-center px-2">
+          <div className="flex gap-4">
+            <HeartIcon className="h-7 w-7 cursor-pointer hover:text-red-500 transition" />
+            <ChatBubbleLeftIcon className="h-7 w-7 cursor-pointer hover:text-blue-500 transition" />
+          </div>
+          <PaperAirplaneIcon className="h-7 w-7 cursor-pointer hover:text-gray-500 transition" />
+        </div>
+
+        {/* 🔢 Me gusta */}
+        <span className="text-sm font-semibold">1234 Me gusta</span>
+
+        {/* 📝 Descripción */}
+        <p className="text-sm">
+          <span className="font-bold">Ximete</span> {content}
+        </p>
+
+        {/* 💬 Comentarios */}
+        <Link href="#" className="text-sm text-gray-500 hover:underline">Ver los 33 comentarios</Link>
+
+        {/* 🖊️ Input para comentar */}
+        <div className="border-t pt-2 mt-2">
+          <input className="w-full bg-transparent border-none focus:outline-none text-sm" type="text" placeholder="Añadir un comentario..." />
+        </div>
+      </div>
+
+      {/* 🖼️ Modal de Imagen Ampliada */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
+          <div className="relative">
+            <button className="absolute top-2 right-2 text-white" onClick={() => setIsOpen(false)}>
+              <XMarkIcon className="h-8 w-8" />
+            </button>
+            <Image src={url} alt="post" width={800} height={800} className="rounded-lg max-w-[90vw] max-h-[90vh]" />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

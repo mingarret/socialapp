@@ -1,5 +1,3 @@
-
-
 import { auth0 } from "./app/lib/auth0"
 
 export async function middleware(request) {

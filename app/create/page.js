@@ -17,7 +17,7 @@ export default function CreatePostPage() {
           <input
             name="content"
             id="content"
-            className="w-full p-2 rounded-lg border dark:bg-neutral-900 dark:border-neutral-800"
+            className="w-full p-2 rounded-lg border bg-white text-black"
           />
         </div>
         <button
