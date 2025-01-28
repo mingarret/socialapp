@@ -6,15 +6,14 @@ import { HeartIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@he
 import Link from "next/link";
 
 export default function Post({ content, url }) {
-  const [isOpen, setIsOpen] = useState(false); // Estado para abrir/cerrar el modal
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* 📌 Post principal */}
-      <div className="flex flex-col gap-3 max-w-md bg-white p-4 rounded-lg shadow-md">
+      <div className="flex flex-col gap-4 w-full max-w-lg bg-white p-5 rounded-lg shadow-lg">
         {/* 🧑‍💻 Usuario */}
         <div className="flex items-center gap-3">
-          <Image src="/Children of Morta.jpg" alt="avatar" width={32} height={32} className="rounded-full" />
+          <Image src="/akira.jpeg" alt="avatar" width={40} height={40} className="rounded-full" />
           <div className="flex flex-col">
             <span className="font-bold text-sm">Ximo</span>
             <span className="text-xs text-gray-500">1 día</span>
@@ -22,13 +21,13 @@ export default function Post({ content, url }) {
         </div>
 
         {/* 📸 Imagen del post con efecto lupa */}
-        <div className="overflow-hidden rounded-lg cursor-zoom-in" onClick={() => setIsOpen(true)}>
+        <div className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform" onClick={() => setIsOpen(true)}>
           <Image 
             src={url} 
             alt="post" 
-            width={448} 
-            height={448} 
-            className="rounded-lg object-cover hover:scale-105 transition-transform"
+            width={500} 
+            height={500} 
+            className="rounded-lg object-cover"
           />
         </div>
 

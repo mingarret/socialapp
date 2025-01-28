@@ -31,7 +31,8 @@ export default async function RootLayout({ children }) {
         {session ? (
           <>
             <Navbar session={session} />
-            <main className="flex-1 flex justify-center items-center bg-gray-100">
+            <main className="flex-1 flex flex-col items-center bg-gray-100 overflow-y-auto">
+
               {children}
             </main>
           </>
