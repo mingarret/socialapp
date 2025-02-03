@@ -5,8 +5,12 @@ import { useState } from "react";
 import { HeartIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-export default function Post({ content, url }) {
+export default function Post({ content, url }) { // 🔹 Recibimos solo `url`, no un array
   const [isOpen, setIsOpen] = useState(false);
+
+  if (!url) {
+    return <p className="text-center text-gray-500">❌ No hay imagen disponible</p>;
+  }
 
   return (
     <>
@@ -21,9 +25,12 @@ export default function Post({ content, url }) {
         </div>
 
         {/* 📸 Imagen del post con efecto lupa */}
-        <div className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform" onClick={() => setIsOpen(true)}>
+        <div
+          className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform"
+          onClick={() => setIsOpen(true)}
+        >
           <Image 
-            src={url} 
+            src={url}  // 🔹 Volvemos a recibir `url` como string
             alt="post" 
             width={500} 
             height={500} 
