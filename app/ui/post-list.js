@@ -12,9 +12,9 @@ export default async function PostList() {
   const {user_id}= (await auth0.getSession()).user;
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-8 mt-10 pb-32"> 
-      {posts.map((post) => (
-        <Post key={post.post_id} content={post.content} url={post.url} />
+    <div className="flex flex-col grow gap-16 mt-16 items-center">
+      {posts.map( post => (
+        <Post key={post.post_id} user_id= {user_id} post_id={post.post_id} content={post.content} url={post.url}/>
       ))}
     </div>
   );

@@ -69,8 +69,9 @@ export default function CreatePostPage() {
           className="border-2 border-dashed border-gray-400 rounded-lg p-6 text-center cursor-pointer"
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          onClick={() => inputRef.current.click()}
+          onClick={() => inputRef.current && inputRef.current.click()} // 👈 Aquí la corrección
         >
+
           <Image
             src={preview}
             alt="Preview"

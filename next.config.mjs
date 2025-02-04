@@ -2,8 +2,13 @@ import 'dotenv/config';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images:{
-    domains:["8tt3ypdflkc4itj6.public.blob.vercel-storage.com"]
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "8tt3ypdflkc4itj6.public.blob.vercel-storage.com",
+      },
+    ],
   },
   reactStrictMode: true,
   experimental: {

@@ -35,6 +35,6 @@ export default async function Seed() {
     return <p>Database seeded successfully.</p>;
   } catch (error) {
     console.error("Error creando las tablas:", error.message);
-    return <p>Error al seedear la base de datos.</p>;
+    return <p>Ximete la has cagado.</p>;
   }
 }
