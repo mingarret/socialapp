@@ -24,20 +24,18 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex h-screen`}
-      >
-        {/* Si el usuario está autenticado, mostramos la app */}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex h-screen bg-gray-900 text-white`}>
         {session ? (
           <>
+            {/* ✅ Navbar flotante con separación */}
             <Navbar session={session} />
-            <main className="flex-1 flex flex-col items-center bg-gray-100 overflow-y-auto">
 
+            {/* ✅ Contenido principal con margen a la izquierda */}
+            <main className="flex-1 flex flex-col items-center bg-gray-800 text-white ml-72 min-h-screen p-6">
               {children}
             </main>
           </>
         ) : (
-          // 🛑 Modal de login si NO hay sesión
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-80">
             <div className="bg-white p-8 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold mb-4">Inicia sesión</h2>

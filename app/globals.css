@@ -9,7 +9,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #1a1a1a; /* 🔹 Color oscuro pero no negro */
     --foreground: #ededed;
   }
 }
@@ -18,6 +18,8 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 nav {
@@ -26,38 +28,17 @@ nav {
   left: 0;
   width: 256px;
   height: 100%;
+  background: var(--background);
+  border-right: 1px solid rgba(255, 255, 255, 0.2); /* 🔹 Línea separadora blanca */
 }
 
 main {
   margin-left: 256px;
   min-height: 100vh;
+  padding: 20px; /* 🔹 Espaciado para evitar que los posts queden pegados */
+  background-color: inherit; /* Heredar el fondo del body */
 }
 
-textarea:focus,
-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5); /* Azul */
-}
-
-html, body {
-  height: auto; /* Permitir que crezca dinámicamente */
-  margin: 0;
-  padding: 0;
-  display: block;
-  background-color: #f3f4f6; /* Fondo gris claro */
-}
-
-#root,
-#__next {
-  display: block;
-  width: 100%;
-  min-height: 100vh;
-}
-
-
-.nav-icon-active {
-  color: #4f46e5; /* Índigo */
-}
-.nav-icon-inactive {
-  color: #9ca3af; /* Gris claro */
+ * {
+  outline: 1px solid red !important;
 }

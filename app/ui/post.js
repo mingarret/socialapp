@@ -6,16 +6,16 @@ import { HeartIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@he
 import Link from "next/link";
 import LikeButton from "./like-button";
 
-export default function Post({ post_id, user_id, content, url }) {
+export default function Post({ post_id, user_id, content, url, likeCount }) {
   const [isOpen, setIsOpen] = useState(false); // Estado para el modal de la imagen
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-lg bg-white p-5 rounded-lg shadow-lg mb-16">  
+    <div className="flex flex-col gap-4 w-full max-w-lg bg-white p-5 rounded-lg shadow-lg mb-10">
       {/* 🧑‍💻 Usuario */}
       <div className="flex items-center gap-3">
-        <Image src="/avatar.jpg" alt="avatar" width={40} height={40} className="rounded-full" />
+        <Image src="/akira.jpeg" alt="avatar" width={40} height={40} className="rounded-full" />
         <div className="flex flex-col">
-          <span className="font-bold text-sm">Ximillo</span>
+          <span className="font-bold text-sm text-black">Ximillo</span> {/* Color negro para visibilidad */}
           <span className="text-xs text-gray-500">1 día</span>
         </div>
       </div>
@@ -40,30 +40,33 @@ export default function Post({ post_id, user_id, content, url }) {
 
       {/* ❤️ Iconos de Interacción */}
       <div className="flex justify-between items-center px-2">
-        <div className="flex gap-4">
+        <div className="flex items-center gap-2">
           <LikeButton post_id={post_id} user_id={user_id} />
-          <ChatBubbleLeftIcon className="h-7 w-7 cursor-pointer hover:text-blue-500 transition" />
+          <span className="text-sm font-semibold text-gray-700">{likeCount} Me gusta</span>
         </div>
-        <PaperAirplaneIcon className="h-7 w-7 cursor-pointer hover:text-gray-500 transition" />
+        <div className="flex gap-4">
+          <ChatBubbleLeftIcon className="h-7 w-7 cursor-pointer hover:text-blue-500 transition text-gray-700" />
+          <PaperAirplaneIcon className="h-7 w-7 cursor-pointer hover:text-gray-500 transition text-gray-700" />
+        </div>
       </div>
 
       {/* 📝 Descripción */}
-      <p className="text-sm">
+      <p className="text-sm text-black">
         <span className="font-bold">Ximillo</span> {content}
       </p>
 
       {/* 💬 Comentarios */}
-      <Link href="#" className="text-sm text-gray-500 hover:underline">Ver los 33 comentarios</Link>
+      <Link href="#" className="text-sm text-blue-600 hover:underline">Ver los 33 comentarios</Link>
 
       {/* 🖊️ Input para comentar */}
       <div className="border-t pt-2 mt-2">
-        <input className="w-full bg-transparent border-none focus:outline-none text-sm" type="text" placeholder="Añadir un comentario..." />
+        <input className="w-full bg-transparent border-none focus:outline-none text-sm text-black" type="text" placeholder="Añadir un comentario..." />
       </div>
 
       {/* 🖼️ Modal de Imagen Ampliada */}
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
-          <div className="relative">
+          <div className="relative animate-fade-in">
             <button className="absolute top-2 right-2 text-white" onClick={() => setIsOpen(false)}>
               <XMarkIcon className="h-8 w-8" />
             </button>

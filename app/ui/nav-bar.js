@@ -4,28 +4,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import {
-  HomeIcon,
-  MagnifyingGlassIcon,
-  PlusCircleIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
+  FiHome,
+  FiSearch,
+  FiPlusSquare,
+  FiUser,
+  FiLogOut,
+} from "react-icons/fi";
 
 export default function NavBar({ session }) {
   const path = usePathname();
 
   const links = [
-    { href: "/", icon: HomeIcon, label: "Home" },
-    { href: "/search", icon: MagnifyingGlassIcon, label: "Search" },
-    { href: "/create", icon: PlusCircleIcon, label: "Create" },
-    { href: "/profile", icon: UserIcon, label: "Profile" },
+    { href: "/", icon: FiHome, label: "Inicio" },
+    { href: "/search", icon: FiSearch, label: "Buscar" },
+    { href: "/create", icon: FiPlusSquare, label: "Crear" },
+    { href: "/profile", icon: FiUser, label: "Perfil" },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-64 h-full bg-white p-6 shadow-lg border-r border-gray-200 flex flex-col justify-between">
-      {/* Logo y navegación */}
+    <nav className="fixed top-0 left-4 w-64 h-full bg-gray-900 shadow-lg border-r border-white/20 p-6 flex flex-col justify-between rounded-lg">
       <div>
-        <h1 className="mb-10 text-2xl font-extrabold text-gray-800">
-          Social App
+        <h1 className="mb-10 text-2xl font-extrabold text-white">
+          📸 Social App
         </h1>
         <ul className="flex flex-col gap-6">
           {links.map(({ href, icon: Icon, label }) => (
@@ -33,19 +33,11 @@ export default function NavBar({ session }) {
               <Link
                 href={href}
                 className={clsx(
-                  "flex items-center gap-4 p-3 rounded-lg hover:bg-indigo-50 transition-all duration-200",
-                  {
-                    "bg-indigo-100 text-indigo-600 font-semibold": path === href,
-                    "text-gray-700": path !== href,
-                  }
+                  "flex items-center gap-4 p-3 rounded-lg hover:bg-gray-700 transition-all duration-200",
+                  { "bg-gray-800 text-white font-semibold": path === href }
                 )}
               >
-                <Icon
-                  className={clsx("h-6 w-6", {
-                    "text-indigo-600": path === href,
-                    "text-gray-500": path !== href,
-                  })}
-                />
+                <Icon className="h-6 w-6" />
                 <span className="text-sm">{label}</span>
               </Link>
             </li>
@@ -53,23 +45,16 @@ export default function NavBar({ session }) {
         </ul>
       </div>
 
-      {/* Login / Logout en la parte inferior */}
-      <div className="border-t pt-4">
+      <div className="border-t pt-4 border-white/20">
         {session ? (
           <div className="flex flex-col items-center">
-            <span className="text-sm font-medium">{session.user.name}</span>
-            <Link
-              href="/auth/logout"
-              className="text-sm text-red-500 hover:underline mt-2"
-            >
-              Logout
+            <span className="text-sm font-medium text-white">{session.user.name}</span>
+            <Link href="/auth/logout" className="flex items-center gap-2 text-sm text-red-400 hover:underline mt-2">
+              <FiLogOut className="h-5 w-5" /> Logout
             </Link>
           </div>
         ) : (
-          <Link
-            href="/auth/login"
-            className="block text-center text-sm text-blue-500 hover:underline"
-          >
+          <Link href="/auth/login" className="block text-center text-sm text-blue-400 hover:underline">
             Login
           </Link>
         )}

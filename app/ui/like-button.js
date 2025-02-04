@@ -65,27 +65,30 @@ export default function LikeButton({ post_id, user_id }) {
       <div className="relative flex items-center gap-2">
         {/* ❤️ Icono de Like */}
         <HeartIcon
-          onClick={handleLike}
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-          onDoubleClick={() => setShowModal(true)} // 🔹 Abrir modal con doble clic
-          className={`h-6 w-6 cursor-pointer transition ${
-            liked ? "text-red-500" : "text-gray-500"
-          } hover:text-red-500 ${animate ? "scale-125" : "scale-100"}`}
+            onClick={handleLike}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onDoubleClick={() => setShowModal(true)}
+            className={`h-6 w-6 cursor-pointer transition-all duration-300 ${
+            liked ? "text-red-500 fill-red-500" : "text-gray-500 hover:text-red-500"
+            } ${animate ? "scale-125" : "scale-100"}`}
         />
-        <span className="text-sm font-semibold">{likeCount}</span>
+  
+        {/* 🔢 Contador de Likes - Aseguramos visibilidad */}
+        <span className="text-sm font-semibold text-black relative z-10">{likeCount}</span>
 
-        {/* 🔹 Tooltip con nombres de los primeros usuarios */}
+        {/* 🛠 Tooltip con nombres de usuarios que dieron like */}
         {showTooltip && usersWhoLiked.length > 0 && (
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white text-black text-xs p-2 rounded shadow-lg w-40">
-            {usersWhoLiked.slice(0, 5).map((user, index) => (
-              <div key={index} className="truncate">
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white text-black text-xs p-2 rounded shadow-lg w-40 z-50">
+            {usersWhoLiked.map((user, index) => (
+                <div key={index} className="truncate">
                 {user.username}
-              </div>
+                </div>
             ))}
-          </div>
+            </div>
         )}
-      </div>
+        </div>
+
 
       {/* 🖼️ Modal con lista completa de usuarios */}
       {showModal && (
