@@ -2,6 +2,13 @@ import { sql } from "@vercel/postgres";
 
 export default async function Seed() {
   try {
+    // Borrar tablas si existen
+    await sql`
+      DROP TABLE IF EXISTS sa_likes;
+      DROP TABLE IF EXISTS sa_posts;
+      DROP TABLE IF EXISTS sa_users;
+    `;
+
     // Crear tabla de usuarios si no existe
     await sql`
       CREATE TABLE IF NOT EXISTS sa_users (
@@ -32,9 +39,18 @@ export default async function Seed() {
       )
     `;
 
-    return <p>Database seeded successfully.</p>;
+    return (
+      <div>
+        <h1>Seed completed successfully</h1>
+      </div>
+    );
   } catch (error) {
-    console.error("Error creando las tablas:", error.message);
-    return <p>Ximete la has cagado.</p>;
-  }
+    console.error("Error during seeding:", error);
+    return (
+      <div>
+        <h1>Error during seeding</h1>
+        <p>{error.message}</p>
+      </div>
+    );
+  }
 }

@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { HeartIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { insertLike, checkLike, countLikes, getUsersWhoLiked } from "../lib/action";
+import { useState, useEffect } from "react";//importar useState y useEffect 
+import { HeartIcon, XMarkIcon } from "@heroicons/react/24/outline";//importar iconos de corazón y X
+import { insertLike, removeLike, checkLike, countLikes, getUsersWhoLiked } from "../lib/action";//importar funciones de acción
 
 export default function LikeButton({ post_id, user_id }) {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [usersWhoLiked, setUsersWhoLiked] = useState([]);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [showModal, setShowModal] = useState(false); // Estado para el modal
-  const [animate, setAnimate] = useState(false); // Estado para animación de like
+  const [liked, setLiked] = useState(false);//estado para saber si el usuario dio like
+  const [likeCount, setLikeCount] = useState(0);//estado para contar los likes
+  const [usersWhoLiked, setUsersWhoLiked] = useState([]);//estado para obtener los usuarios que dieron like
+  const [showModal, setShowModal] = useState(false);//estado para mostrar el modal
+  const [animate, setAnimate] = useState(false);//estado para animar el botón de like
 
+  // Validar que `post_id` y `user_id` sean válidos
   if (!post_id || !user_id) {
     console.error("❌ Error en LikeButton: `post_id` o `user_id` son inválidos.", { post_id, user_id });
     return null;
   }
 
-  // 🛠 Obtener estado inicial (si el usuario ya ha dado like y cuántos hay)
+  // Obtener datos del like al cargar el componente
   useEffect(() => {
     const fetchLikeData = async () => {
       try {
@@ -33,10 +33,12 @@ export default function LikeButton({ post_id, user_id }) {
       }
     };
 
+    // Llamar a la función para obtener los datos
     fetchLikeData();
   }, [post_id, user_id]);
 
-  // 🛠 Manejar el Like
+  
+  // Manejar el evento de dar like
   const handleLike = async () => {
     try {
       if (!liked) {
@@ -44,14 +46,12 @@ export default function LikeButton({ post_id, user_id }) {
         setLiked(true);
         setLikeCount((prev) => prev + 1);
 
-        // 🔄 Actualizar datos
         const totalLikes = await countLikes(post_id);
         const users = await getUsersWhoLiked(post_id);
 
         setLikeCount(totalLikes);
         setUsersWhoLiked(users);
 
-        // 🔹 Activar animación
         setAnimate(true);
         setTimeout(() => setAnimate(false), 300);
       }
@@ -60,35 +60,41 @@ export default function LikeButton({ post_id, user_id }) {
     }
   };
 
+  // Manejar el evento de eliminar like
+  const handleUnlike = async () => {
+    try {
+      if (liked) {
+        await removeLike(post_id, user_id);
+        setLiked(false);
+        setLikeCount((prev) => prev - 1);
+
+        const totalLikes = await countLikes(post_id);
+        const users = await getUsersWhoLiked(post_id);
+
+        setLikeCount(totalLikes);
+        setUsersWhoLiked(users);
+      }
+    } catch (error) {
+      console.error("❌ Error al eliminar el like:", error);
+    }
+  };
+
+  // Renderizar el botón de like
   return (
     <>
       <div className="relative flex items-center gap-2">
         {/* ❤️ Icono de Like */}
         <HeartIcon
-            onClick={handleLike}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-            onDoubleClick={() => setShowModal(true)}
-            className={`h-6 w-6 cursor-pointer transition-all duration-300 ${
+          onClick={handleLike}
+          onDoubleClick={handleUnlike} // Doble clic elimina el like
+          className={`h-6 w-6 cursor-pointer transition-all duration-300 ${
             liked ? "text-red-500 fill-red-500" : "text-gray-500 hover:text-red-500"
-            } ${animate ? "scale-125" : "scale-100"}`}
+          } ${animate ? "scale-125" : "scale-100"}`}
         />
   
-        {/* 🔢 Contador de Likes - Aseguramos visibilidad */}
+        {/* 🔢 Contador de Likes */}
         <span className="text-sm font-semibold text-black relative z-10">{likeCount}</span>
-
-        {/* 🛠 Tooltip con nombres de usuarios que dieron like */}
-        {showTooltip && usersWhoLiked.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white text-black text-xs p-2 rounded shadow-lg w-40 z-50">
-            {usersWhoLiked.map((user, index) => (
-                <div key={index} className="truncate">
-                {user.username}
-                </div>
-            ))}
-            </div>
-        )}
-        </div>
-
+      </div>
 
       {/* 🖼️ Modal con lista completa de usuarios */}
       {showModal && (

@@ -39,6 +39,6 @@ main {
   background-color: inherit; /* Heredar el fondo del body */
 }
 
- * {
+ /** {
   outline: 1px solid red !important;
-}
+}*/

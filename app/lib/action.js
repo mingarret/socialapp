@@ -61,4 +61,23 @@ export async function getUsersWhoLiked(post_id) {
   return rows;
 }
 
+//función para eliminar el like
+export async function removeLike(post_id, user_id) {
+  try {
+    await sql`
+      DELETE FROM sa_likes 
+      WHERE post_id = ${post_id} AND user_id = ${user_id}
+    `;
+  } catch (error) {
+    console.error("❌ Error al eliminar el like:", error);
+  }
+}
+
+//función para obtener los posts
+export async function getPosts() {
+  const { rows } = await sql`
+    SELECT * FROM sa_posts
+  `;
+  return rows;
+}
 
