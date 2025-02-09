@@ -42,3 +42,8 @@ main {
  /** {
   outline: 1px solid red !important;
 }*/
+
+.bg-gradient {
+  background: linear-gradient(135deg, #1e293b, #111827);
+}
+

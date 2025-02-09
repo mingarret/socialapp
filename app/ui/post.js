@@ -42,7 +42,7 @@ export default function Post({ post_id, user_id, content, url, likeCount }) {
       <div className="flex justify-between items-center px-2">
         <div className="flex items-center gap-2">
           <LikeButton post_id={post_id} user_id={user_id} />
-          <span className="text-sm font-semibold text-gray-700">{likeCount} Me gusta</span>
+          <span className="text-sm font-semibold text-gray-700">{likeCount}</span>
         </div>
         <div className="flex gap-4">
           <ChatBubbleLeftIcon className="h-7 w-7 cursor-pointer hover:text-blue-500 transition text-gray-700" />
