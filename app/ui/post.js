@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { HeartIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import LikeButton from "./like-button";
 
-export default function Post({ post_id, user_id, content, url, likeCount }) {
+export default function Post({ post_id, user_id, content, url, likeCount, isLikedInitial }) {
   const [isOpen, setIsOpen] = useState(false); // Estado para el modal de la imagen
 
   return (
@@ -41,7 +41,8 @@ export default function Post({ post_id, user_id, content, url, likeCount }) {
       {/* ❤️ Iconos de Interacción */}
       <div className="flex justify-between items-center px-2">
         <div className="flex items-center gap-2">
-          <LikeButton post_id={post_id} user_id={user_id} />
+          {/* LikeButton recibe `isLikedInitial` */}
+          <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
           <span className="text-sm font-semibold text-gray-700">{likeCount}</span>
         </div>
         <div className="flex gap-4">

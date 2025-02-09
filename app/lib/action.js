@@ -81,3 +81,12 @@ export async function getPosts() {
   return rows;
 }
 
+// Función para obtener los likes de un usuario en posts específicos
+export async function getLikes(user_id) {
+  const { rows } = await sql`
+    SELECT post_id FROM sa_likes WHERE user_id = ${user_id}
+  `;
+  return rows;
+}
+
+
