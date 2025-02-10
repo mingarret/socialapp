@@ -6,7 +6,7 @@ import { HeartIcon } from "@heroicons/react/24/solid";
 import { insertLike, removeLike, checkLike, countLikes, getUsersWhoLiked } from "../lib/action";
 
 export default function LikeButton({ post_id, user_id }) {
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(true);
   const [likeCount, setLikeCount] = useState(0);
   const [usersWhoLiked, setUsersWhoLiked] = useState([]);
   const [showTooltip, setShowTooltip] = useState(false);

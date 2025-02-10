@@ -4,9 +4,15 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import LikeButton from "./like-button";
-import { insertComment, getComments } from "../lib/action"; 
+import { insertComment, getComments } from "../lib/action";
+import { es } from "date-fns/locale";  // Para español
+import { formatDistanceToNow } from "date-fns";
 
-export default function Post({ post_id, user_id, username, picture, content, url, likeCount, isLikedInitial }) {
+
+ // Para español
+
+
+export default function Post({ post_id, user_id, username, picture, content, url, likeCount, isLikedInitial, created_at }) {
   const [isOpen, setIsOpen] = useState(false); // Modal de imagen ampliada
   const [commentModal, setCommentModal] = useState(false); // Modal para comentar
   const [viewCommentsModal, setViewCommentsModal] = useState(false); // Modal para ver comentarios
@@ -14,6 +20,10 @@ export default function Post({ post_id, user_id, username, picture, content, url
   const [loading, setLoading] = useState(false); // Estado de carga
   const [comments, setComments] = useState([]); // Lista de comentarios
   const [commentCount, setCommentCount] = useState(0); // Contador de comentarios
+
+  // ✅ Convertir `created_at` en un objeto Date válido
+  const formattedDate = created_at ? new Date(created_at) : null;
+
 
   // 🔹 Obtener comentarios y contador al abrir el modal de visualización
   useEffect(() => {
@@ -76,7 +86,9 @@ export default function Post({ post_id, user_id, username, picture, content, url
         />
         <div className="flex flex-col">
           <span className="font-bold text-sm text-black">{username || "Desconocido"}</span>
-          <span className="text-xs text-gray-500">1 día</span>
+          <span className="text-xs text-gray-500">
+          {formattedDate ? formatDistanceToNow(formattedDate, { addSuffix: true, locale: es }) : "Fecha desconocida"}
+          </span>
         </div>
       </div>
 
@@ -94,7 +106,6 @@ export default function Post({ post_id, user_id, username, picture, content, url
       <div className="flex justify-between items-center px-2">
         <div className="flex items-center gap-2">
           <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
-          <span className="text-sm font-semibold text-gray-700">{likeCount} Me gusta</span>
         </div>
         <div className="flex items-center gap-2">
           {/* 📝 Icono de comentarios con contador */}
