@@ -1,20 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChatBubbleLeftIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import LikeButton from "./like-button";
+import { insertComment, getComments } from "../lib/action"; 
 
 export default function Post({ post_id, user_id, username, picture, content, url, likeCount, isLikedInitial }) {
-  const [isOpen, setIsOpen] = useState(false); // Estado para el modal de la imagen
+  const [isOpen, setIsOpen] = useState(false); // Modal de imagen ampliada
+  const [commentModal, setCommentModal] = useState(false); // Modal para comentar
+  const [viewCommentsModal, setViewCommentsModal] = useState(false); // Modal para ver comentarios
+  const [comment, setComment] = useState(""); // Estado del comentario
+  const [loading, setLoading] = useState(false); // Estado de carga
+  const [comments, setComments] = useState([]); // Lista de comentarios
+  const [commentCount, setCommentCount] = useState(0); // Contador de comentarios
+
+  // 🔹 Obtener comentarios y contador al abrir el modal de visualización
+  useEffect(() => {
+    if (viewCommentsModal) {
+      fetchComments();
+    }
+  }, [viewCommentsModal]);
+
+  // 🔹 Obtener comentarios desde la base de datos
+  const fetchComments = async () => {
+    try {
+      const { comments, count } = await getComments(post_id);
+      setComments(comments);
+      setCommentCount(count); // Actualiza el contador
+    } catch (error) {
+      console.error("❌ Error al obtener comentarios:", error);
+    }
+  };
+
+  // 🔹 Manejar el envío del comentario
+  const handleCommentSubmit = async () => {
+    if (!comment.trim()) return;
+
+    setLoading(true);
+    try {
+      await insertComment(post_id, user_id, comment);
+      setComment("");
+      setCommentModal(false);
+      fetchComments(); // Actualizar comentarios después de enviar
+    } catch (error) {
+      console.error("❌ Error al enviar el comentario:", error);
+    }
+    setLoading(false);
+  };
+
+  // 🔹 Cerrar modal con tecla ESC
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setCommentModal(false);
+        setViewCommentsModal(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-lg bg-white p-5 rounded-lg shadow-lg mb-10">
       
       {/* 🧑‍💻 Usuario */}
       <div className="flex items-center gap-3">
-        {/* ✅ Imagen del usuario con fallback */}
         <Image 
           src={picture || "/default-avatar.png"}  
           alt={username || "Usuario desconocido"} 
@@ -22,31 +74,19 @@ export default function Post({ post_id, user_id, username, picture, content, url
           height={40} 
           className="rounded-full" 
         />
-
-        {/* ✅ Nombre del usuario */}
         <div className="flex flex-col">
           <span className="font-bold text-sm text-black">{username || "Desconocido"}</span>
           <span className="text-xs text-gray-500">1 día</span>
         </div>
       </div>
 
-      {/* 📸 Imagen del post con efecto lupa */}
-      {url && ( // 🔹 Evita renderizar si `url` es null
+      {/* 📸 Imagen del post */}
+      {url && (
         <div 
           className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform relative"
           onClick={() => setIsOpen(true)}
         >
-          <Image 
-            src={url} 
-            alt={content || "Imagen del post"} 
-            width={500} 
-            height={500} 
-            className="rounded-lg object-cover"
-          />
-          {/* 🔍 Icono de lupa al pasar el cursor */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-            <span className="bg-black bg-opacity-50 text-white p-2 rounded-full">🔍</span>
-          </div>
+          <Image src={url} alt="post" width={500} height={500} className="rounded-lg object-cover" />
         </div>
       )}
 
@@ -56,9 +96,13 @@ export default function Post({ post_id, user_id, username, picture, content, url
           <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
           <span className="text-sm font-semibold text-gray-700">{likeCount} Me gusta</span>
         </div>
-        <div className="flex gap-4">
-          <ChatBubbleLeftIcon className="h-7 w-7 cursor-pointer hover:text-blue-500 transition text-gray-700" />
-          <PaperAirplaneIcon className="h-7 w-7 cursor-pointer hover:text-gray-500 transition text-gray-700" />
+        <div className="flex items-center gap-2">
+          {/* 📝 Icono de comentarios con contador */}
+          <ChatBubbleLeftIcon
+            className="h-7 w-7 cursor-pointer hover:text-blue-500 transition text-gray-700"
+            onClick={() => setCommentModal(true)}
+          />
+          <span className="text-sm font-semibold text-gray-700">{commentCount} comentarios</span>
         </div>
       </div>
 
@@ -67,32 +111,68 @@ export default function Post({ post_id, user_id, username, picture, content, url
         <span className="font-bold">{username}</span> {content}
       </p>
 
-      {/* 💬 Comentarios */}
-      <Link href="#" className="text-sm text-blue-600 hover:underline">Ver los 33 comentarios</Link>
+      {/* 💬 Enlace para ver todos los comentarios */}
+      <p 
+        className="text-sm text-blue-600 hover:underline cursor-pointer"
+        onClick={() => setViewCommentsModal(true)}
+      >
+        Ver todos los comentarios
+      </p>
 
-      {/* 🖊️ Input para comentar */}
-      <div className="border-t pt-2 mt-2">
-        <input
-          className="w-full bg-transparent border-none focus:outline-none text-sm text-black"
-          type="text"
-          placeholder="Añadir un comentario..."
-        />
-      </div>
-
-      {/* 🖼️ Modal de Imagen Ampliada */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
-          <div className="relative animate-fade-in">
-            <button className="absolute top-2 right-2 text-white" onClick={() => setIsOpen(false)}>
-              <XMarkIcon className="h-8 w-8" />
+      {/* 🖊️ Modal para comentar */}
+      {commentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+            <button className="absolute top-2 right-2 text-gray-600 hover:text-black" onClick={() => setCommentModal(false)}>
+              <XMarkIcon className="h-6 w-6" />
             </button>
-            <Image src={url} alt="post" width={800} height={800} className="rounded-lg max-w-[90vw] max-h-[90vh]" />
-            {/* ✅ Link para ver más detalles */}
-            <div className="text-center mt-4">
-              <Link href={`/post/${post_id}`} className="text-blue-500 hover:underline">
-                Ver más detalles
-              </Link>
+            <h2 className="text-lg font-bold mb-4 text-black">Escribe un comentario</h2>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full p-2 border rounded-lg text-black"
+              placeholder="Escribe tu comentario aquí..."
+            />
+            <div className="flex justify-end gap-4 mt-4">
+              <button className="bg-gray-300 text-black px-4 py-2 rounded-lg" onClick={() => setCommentModal(false)}>
+                Cancelar
+              </button>
+              <button 
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+                onClick={handleCommentSubmit}
+                disabled={loading}
+              >
+                {loading ? "Guardando..." : "Comentar"}
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 📜 Modal para ver todos los comentarios */}
+      {viewCommentsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-[600px] max-h-[500px] overflow-auto relative">
+            <button className="absolute top-2 right-2 text-gray-600 hover:text-black" onClick={() => setViewCommentsModal(false)}>
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+            <h2 className="text-lg font-bold mb-4 text-black">Comentarios</h2>
+            
+            {comments.length > 0 ? (
+              <ul className="space-y-4">
+                {comments.map((cmt, index) => (
+                  <li key={index} className="flex gap-3 p-2 border-b">
+                    <Image src={cmt.picture || "/default-avatar.png"} alt={cmt.username} width={30} height={30} className="rounded-full" />
+                    <div>
+                      <span className="font-bold text-sm">{cmt.username}</span>
+                      <p className="text-gray-700">{cmt.content}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No hay comentarios todavía.</p>
+            )}
           </div>
         </div>
       )}

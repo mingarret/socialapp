@@ -107,3 +107,36 @@ export async function getLikes(user_id) {
   `;
   return rows;
 }
+
+// ✅ Función para obtener los comentarios de un post
+export async function getComments(post_id) {
+  try {
+    const comments = await sql`
+      SELECT sa_comments.content, sa_users.username, sa_users.picture 
+      FROM sa_comments
+      JOIN sa_users ON sa_comments.user_id = sa_users.user_id
+      WHERE sa_comments.post_id = ${post_id}
+      ORDER BY sa_comments.created_at DESC
+    `;
+
+    const count = comments.rows.length; // Contar comentarios
+
+    return { comments: comments.rows, count };
+  } catch (error) {
+    console.error("❌ Error al obtener comentarios:", error);
+    return { comments: [], count: 0 };
+  }
+}
+
+
+// ✅ Función para insertar un nuevo comentario
+export async function insertComment(post_id, user_id, content) {
+  try {
+    await sql`
+      INSERT INTO sa_comments (post_id, user_id, content) 
+      VALUES (${post_id}, ${user_id}, ${content})
+    `;
+  } catch (error) {
+    console.error("❌ Error al insertar comentario:", error);
+  }
+}

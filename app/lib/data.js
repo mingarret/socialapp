@@ -57,4 +57,24 @@ export async function getPost(post_id) {
     `).rows;
 }
 
+// Obtener comentarios de un post
+export async function getComments(post_id) {
+    return (await sql`
+      SELECT sa_comments.comment_id, sa_comments.content, sa_comments.created_at, 
+             sa_users.username, sa_users.picture 
+      FROM sa_comments 
+      JOIN sa_users ON sa_comments.user_id = sa_users.user_id
+      WHERE sa_comments.post_id = ${post_id}
+      ORDER BY sa_comments.created_at DESC
+    `).rows;
+  }
+  
+  // Insertar un nuevo comentario
+  export async function insertComment(post_id, user_id, content) {
+    await sql`
+      INSERT INTO sa_comments (post_id, user_id, content)
+      VALUES (${post_id}, ${user_id}, ${content})
+    `;
+  }
+
   

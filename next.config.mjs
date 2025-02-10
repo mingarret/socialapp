@@ -17,6 +17,7 @@ const nextConfig = {
         hostname: "8tt3ypdflkc4itj6.public.blob.vercel-storage.com",
       }
     ],
+    domains: ["randomuser.me", "via.placeholder.com"], // ✅ Agregamos los dominios permitidos
   },
   reactStrictMode: true,
   experimental: {
