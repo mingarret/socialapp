@@ -6,7 +6,6 @@ export default async function PostList() {
   const session = await auth0.getSession();
   const user_id = session?.user?.user_id;
 
-  // Obtener posts y los likes del usuario
   const [posts, likes] = await Promise.all([getPosts(), getLikes(user_id)]);
 
   return (
@@ -15,10 +14,12 @@ export default async function PostList() {
         <Post
           key={post.post_id}
           post_id={post.post_id}
-          user_id={user_id}
+          user_id={post.user_id}
+          username={post.username}  // ✅ Pasamos el nombre del usuario
+          picture={post.picture}    // ✅ Pasamos la imagen del usuario
           content={post.content}
           url={post.url}
-          isLikedInitial={likes.some((like) => like.post_id === post.post_id)} // Verificar si el usuario ha dado like
+          isLikedInitial={likes.some((like) => like.post_id === post.post_id)}
         />
       ))}
     </div>

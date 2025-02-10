@@ -1,25 +1,30 @@
 "use server";
 
-import { put } from "@vercel/blob";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { sql } from "@vercel/postgres";
+import { put } from "@vercel/blob";
+import { auth0 } from "./auth0";
 
-//accion para el formulario de crear post
 export async function createPost(formData) {
+  const session = await auth0.getSession();
+  if (!session || !session.user) {
+    throw new Error("Usuario no autenticado");
+  }
 
-  //guardar la imagen en el bucket
-  const { url } = await put("media", formData.get("media"), {
-    access: "public",
-  });
-
-  //variables del contenido
+  const { user_id } = session.user;
+  const { url } = await put("media", formData.get("media"), { access: "public" });
   const content = formData.get("content");
- 
-  //guardar el post en la base de datos
-  await sql`INSERT INTO sa_posts(content, url) 
-  VALUES(
-    ${content}, 
-    ${url})`;
+
+  await sql`
+    INSERT INTO sa_posts(content, url, user_id)
+    VALUES (${content}, ${url}, ${user_id})`;
+
+  revalidatePath("/"); // ✅ Ahora está correctamente importado
+  redirect("/");
 }
+
+
 export async function insertLike(post_id, user_id) {
 
   //guardar el like en la base de datos
@@ -75,11 +80,22 @@ export async function removeLike(post_id, user_id) {
 
 //función para obtener los posts
 export async function getPosts() {
-  const { rows } = await sql`
-    SELECT * FROM sa_posts
-  `;
-  return rows;
+  return (await sql`
+  SELECT 
+      sa_posts.post_id, 
+      content, 
+      url, 
+      sa_posts.user_id, 
+      sa_users.username,  -- ✅ Obtener nombre del usuario
+      sa_users.picture,   -- ✅ Obtener foto del usuario
+      COUNT(sa_likes.user_id) AS num_likes  -- ✅ Contar likes
+  FROM sa_posts
+  JOIN sa_users ON sa_posts.user_id = sa_users.user_id  -- ✅ Unir con la tabla de usuarios
+  LEFT JOIN sa_likes ON sa_posts.post_id = sa_likes.post_id
+  GROUP BY sa_posts.post_id, sa_users.username, sa_users.picture
+`).rows;
 }
+
 
 // Función para obtener los likes de un usuario en posts específicos
 export async function getLikes(user_id) {
@@ -88,5 +104,3 @@ export async function getLikes(user_id) {
   `;
   return rows;
 }
-
-

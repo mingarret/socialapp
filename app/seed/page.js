@@ -2,16 +2,16 @@ import { sql } from "@vercel/postgres";
 
 export default async function Seed() {
   try {
-    // Borrar tablas si existen
-    await sql`
-      DROP TABLE IF EXISTS sa_likes;
-      DROP TABLE IF EXISTS sa_posts;
-      DROP TABLE IF EXISTS sa_users;
-    `;
+    console.log("🌱 Seeding database...");
 
-    // Crear tabla de usuarios si no existe
+    // 🚨 Eliminar las tablas en orden correcto para evitar problemas de referencias
+    await sql`DROP TABLE IF EXISTS sa_likes`;
+    await sql`DROP TABLE IF EXISTS sa_posts`;
+    await sql`DROP TABLE IF EXISTS sa_users`;
+
+    // ✅ Crear la tabla de usuarios
     await sql`
-      CREATE TABLE IF NOT EXISTS sa_users (
+      CREATE TABLE sa_users (
         user_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         username TEXT NOT NULL,
         name TEXT NOT NULL,
@@ -20,37 +20,43 @@ export default async function Seed() {
       )
     `;
 
-    // Crear tabla de posts si no existe
+    // ✅ Crear la tabla de posts
     await sql`
-      CREATE TABLE IF NOT EXISTS sa_posts (
+      CREATE TABLE sa_posts (
         post_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         content TEXT NOT NULL,
         url TEXT NOT NULL,
-        user_id UUID REFERENCES sa_users(user_id)
+        user_id UUID REFERENCES sa_users(user_id) ON DELETE CASCADE
       )
     `;
 
-    // Crear tabla de likes (pivote) si no existe
+    // ✅ Crear la tabla de likes
     await sql`
-      CREATE TABLE IF NOT EXISTS sa_likes (
-        user_id UUID REFERENCES sa_users(user_id),
-        post_id UUID REFERENCES sa_posts(post_id),
+      CREATE TABLE sa_likes (
+        user_id UUID REFERENCES sa_users(user_id) ON DELETE CASCADE,
+        post_id UUID REFERENCES sa_posts(post_id) ON DELETE CASCADE,
         PRIMARY KEY (user_id, post_id)
       )
     `;
 
-    return (
-      <div>
-        <h1>Seed completed successfully</h1>
-      </div>
-    );
+    // 🔹 Insertamos un usuario de prueba
+    const { rows } = await sql`
+      INSERT INTO sa_users (username, name, picture, email) VALUES
+      ('ximillo', 'Ximillo', 'https://randomuser.me/api/portraits/men/1.jpg', 'ximillo@example.com')
+      RETURNING user_id
+    `;
+
+    const userId = rows[0].user_id;
+
+    // 🔹 Insertamos posts con el usuario de prueba
+    await sql`
+      INSERT INTO sa_posts (content, url, user_id) VALUES
+      ('Hola, este es mi primer post!', 'https://via.placeholder.com/500', ${userId}),
+      ('Disfrutando el día 🌞', 'https://via.placeholder.com/500', ${userId})
+    `;
+
+    console.log("✅ Seed completado correctamente.");
   } catch (error) {
-    console.error("Error during seeding:", error);
-    return (
-      <div>
-        <h1>Error during seeding</h1>
-        <p>{error.message}</p>
-      </div>
-    );
+    console.error("❌ Error en el seed:", error);
   }
 }
