@@ -4,7 +4,7 @@ import Post from "./post";
 
 export default async function PostList() {
   const session = await auth0.getSession();
-  const user_id = session?.user?.user_id;
+  const user_id = session?.user?.user_id; // ✅ El usuario autenticado
 
   const [posts, likes] = await Promise.all([getPosts(), getLikes(user_id)]);
 
@@ -14,9 +14,9 @@ export default async function PostList() {
         <Post
           key={post.post_id}
           post_id={post.post_id}
-          user_id={post.user_id}
-          username={post.username}  // ✅ Pasamos el nombre del usuario
-          picture={post.picture}    // ✅ Pasamos la imagen del usuario
+          user_id={user_id}  // ✅ Pasamos el usuario autenticado aquí
+          username={post.username}
+          picture={post.picture}
           content={post.content}
           url={post.url}
           isLikedInitial={likes.some((like) => like.post_id === post.post_id)}

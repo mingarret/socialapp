@@ -24,47 +24,49 @@ export async function createPost(formData) {
   redirect("/");
 }
 
-
+//función para insertar un like
 export async function insertLike(post_id, user_id) {
-
-  //guardar el like en la base de datos
-  sql `INSERT INTO sa_likes(post_id, user_id) 
-  
-  VALUES (
-    ${post_id},
-    ${user_id} 
-    ) `
+  await sql`
+    INSERT INTO sa_likes (post_id, user_id) 
+    VALUES (${post_id}, ${user_id})
+    ON CONFLICT (post_id, user_id) DO NOTHING
+  `;
 }
 
 //función para verificar si el usuario ya ha dado like
 export async function checkLike(post_id, user_id) {
   const { rows } = await sql`
     SELECT 1 FROM sa_likes 
-    WHERE post_id = ${post_id} AND user_id = ${user_id} 
+    WHERE post_id = ${post_id} 
+    AND user_id = ${user_id} 
     LIMIT 1
   `;
-  return rows.length > 0;
+  return rows.length > 0; // ✅ Retorna `true` si el usuario ha dado like
 }
 
 //función para contar los likes
 export async function countLikes(post_id) {
   const { rows } = await sql`
-    SELECT COUNT(*) AS total FROM sa_likes WHERE post_id = ${post_id}
+    SELECT COUNT(*) AS total 
+    FROM sa_likes 
+    WHERE post_id = ${post_id}
   `;
-  return rows[0].total || 0;
+  return parseInt(rows[0]?.total, 10) || 0;
 }
+
 
 //función para obtener los usuarios que dieron like
 export async function getUsersWhoLiked(post_id) {
   const { rows } = await sql`
-    SELECT sa_users.username 
+    SELECT sa_users.username, sa_users.picture 
     FROM sa_likes
     JOIN sa_users ON sa_likes.user_id = sa_users.user_id
     WHERE sa_likes.post_id = ${post_id}
   `;
-  
-  return rows;
+
+  return rows; // ✅ Ahora devuelve `username` y `picture`
 }
+
 
 //función para eliminar el like
 export async function removeLike(post_id, user_id) {
@@ -74,9 +76,10 @@ export async function removeLike(post_id, user_id) {
       WHERE post_id = ${post_id} AND user_id = ${user_id}
     `;
   } catch (error) {
-    console.error("❌ Error al eliminar el like:", error);
+    console.error("❌ Error al eliminar like:", error);
   }
 }
+
 
 //función para obtener los posts
 export async function getPosts() {
