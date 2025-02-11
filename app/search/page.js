@@ -20,6 +20,8 @@ export default function SearchPage() {
   };
   
 
+
+  
   return (
     <div className="flex flex-col items-center mt-16">
       {/* 🔍 Input de búsqueda */}
