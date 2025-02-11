@@ -140,3 +140,23 @@ export async function insertComment(post_id, user_id, content) {
     console.error("❌ Error al insertar comentario:", error);
   }
 }
+
+export async function searchDatabase(query) {
+  if (!query) return { users: [], posts: [] };
+
+  const users = await sql`
+      SELECT user_id, username, picture 
+      FROM sa_users 
+      WHERE username ILIKE ${'%' + query + '%'}
+      LIMIT 10
+  `;
+
+  const posts = await sql`
+      SELECT post_id, content, url, user_id 
+      FROM sa_posts 
+      WHERE content ILIKE ${'%' + query + '%'}
+      LIMIT 10
+  `;
+
+  return { users: users.rows, posts: posts.rows };
+}
