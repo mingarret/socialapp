@@ -10,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function Post({ post_id, user_id, username, picture, content, url, likeCount, isLikedInitial, created_at }) {
+  const [isImageOpen, setIsImageOpen] = useState(false); // ✅ Estado para la imagen ampliada
   const [isOpen, setIsOpen] = useState(false); // Modal de imagen ampliada
   const [commentModal, setCommentModal] = useState(false); // Modal para comentar
   const [viewCommentsModal, setViewCommentsModal] = useState(false); // Modal para ver comentarios
@@ -73,7 +74,8 @@ export default function Post({ post_id, user_id, username, picture, content, url
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-lg bg-white p-5 rounded-lg shadow-lg mb-10">
+    <div className="flex flex-col gap-6 w-full max-w-2xl bg-white p-6 rounded-xl shadow-2xl mb-12">
+
       
       {/* 🧑‍💻 Usuario */}
       <div className="flex items-center gap-3">
@@ -96,7 +98,7 @@ export default function Post({ post_id, user_id, username, picture, content, url
       {url && (
         <div 
           className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform relative"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setIsImageOpen(true)} // ✅ Abre el modal al hacer clic
         >
           <Image src={url} alt="post" width={500} height={500} className="rounded-lg object-cover" />
         </div>
@@ -173,6 +175,18 @@ export default function Post({ post_id, user_id, username, picture, content, url
             >
               {loading ? "Guardando..." : "Comentar"}
             </button>
+          </div>
+        </div>
+      )}
+  
+      {/* 🖼️ Modal de Imagen Ampliada */}
+      {isImageOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
+          <div className="relative p-4 bg-white rounded-lg shadow-lg">
+            <button className="absolute top-2 right-2 text-gray-700 hover:text-black" onClick={() => setIsImageOpen(false)}>
+              <XMarkIcon className="h-8 w-8" />
+            </button>
+            <Image src={url} alt="Imagen ampliada" width={800} height={800} className="rounded-lg max-w-[90vw] max-h-[90vh]" />
           </div>
         </div>
       )}
