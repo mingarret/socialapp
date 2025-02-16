@@ -160,3 +160,38 @@ export async function searchDatabase(query) {
 
   return { users: users.rows, posts: posts.rows };
 }
+
+// 🔹 Obtiene información del usuario autenticado
+export async function getUserProfile() {
+  const session = await auth0.getSession();
+  if (!session?.user?.email) return null; // Si no hay usuario autenticado, retorna null
+
+  const result = await sql`SELECT * FROM sa_users WHERE email = ${session.user.email} LIMIT 1`;
+  return result.rows[0];
+}
+
+
+// 🔹 Obtiene las publicaciones del usuario
+export async function getUserPosts(userId) {
+  return (await sql`SELECT * FROM sa_posts WHERE user_id = ${userId}`).rows;
+}
+
+// 🔹 Obtiene los comentarios del usuario
+export async function getUserComments(userId) {
+  return (await sql`
+    SELECT sa_comments.content, sa_posts.content AS post_title
+    FROM sa_comments
+    JOIN sa_posts ON sa_comments.post_id = sa_posts.post_id
+    WHERE sa_comments.user_id = ${userId}
+  `).rows;
+}
+
+// 🔹 Obtiene los likes del usuario
+export async function getUserLikes(userId) {
+  return (await sql`
+    SELECT sa_posts.url, sa_posts.post_id
+    FROM sa_likes
+    JOIN sa_posts ON sa_likes.post_id = sa_posts.post_id
+    WHERE sa_likes.user_id = ${userId}
+  `).rows;
+}

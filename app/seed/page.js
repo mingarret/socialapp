@@ -4,14 +4,14 @@ export default async function Seed() {
   try {
     console.log("🌱 Seeding database...");
 
-    // 🚨 Eliminar las tablas en orden correcto para evitar problemas de referencias
-    await sql`DROP TABLE IF EXISTS sa_likes`;
-    await sql`DROP TABLE IF EXISTS sa_posts`;
-    await sql`DROP TABLE IF EXISTS sa_users`;
+    // ✅ Eliminar solo los datos de las tablas sin borrar la estructura
+    await sql`TRUNCATE TABLE sa_likes RESTART IDENTITY CASCADE`;
+    await sql`TRUNCATE TABLE sa_posts RESTART IDENTITY CASCADE`;
+    await sql`TRUNCATE TABLE sa_users RESTART IDENTITY CASCADE`;
 
-    // ✅ Crear la tabla de usuarios
+    // ✅ Crear la tabla de usuarios si no existe
     await sql`
-      CREATE TABLE sa_users (
+      CREATE TABLE IF NOT EXISTS sa_users (
         user_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         username TEXT NOT NULL,
         name TEXT NOT NULL,
@@ -20,9 +20,9 @@ export default async function Seed() {
       )
     `;
 
-    // ✅ Crear la tabla de posts
+    // ✅ Crear la tabla de posts si no existe
     await sql`
-      CREATE TABLE sa_posts (
+      CREATE TABLE IF NOT EXISTS sa_posts (
         post_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         content TEXT NOT NULL,
         url TEXT NOT NULL,
@@ -30,9 +30,9 @@ export default async function Seed() {
       )
     `;
 
-    // ✅ Crear la tabla de likes
+    // ✅ Crear la tabla de likes si no existe
     await sql`
-      CREATE TABLE sa_likes (
+      CREATE TABLE IF NOT EXISTS sa_likes (
         user_id UUID REFERENCES sa_users(user_id) ON DELETE CASCADE,
         post_id UUID REFERENCES sa_posts(post_id) ON DELETE CASCADE,
         PRIMARY KEY (user_id, post_id)
@@ -40,13 +40,13 @@ export default async function Seed() {
     `;
 
     // 🔹 Insertamos un usuario de prueba
-    const { rows } = await sql`
+    /* const { rows } = await sql`
       INSERT INTO sa_users (username, name, picture, email) VALUES
       ('ximillo', 'Ximillo', 'https://randomuser.me/api/portraits/men/1.jpg', 'ximillo@example.com')
       RETURNING user_id
     `;
 
-    const userId = rows[0].user_id;
+    const userId = rows[0].user_id; */
 
     // 🔹 Insertamos posts con el usuario de prueba
     await sql`

@@ -33,7 +33,7 @@ export default async function RootLayout({ children }) {
             <Navbar session={session} />
 
             {/* ✅ Contenido principal con más margen */}
-            <main className="flex-1 flex flex-col items-center bg-gray-800 text-white ml-96 min-h-screen p-6">
+            <main className="flex-1 flex flex-col items-center bg-transparent text-white min-h-screen p-6">
               {children}
             </main>
           </>
