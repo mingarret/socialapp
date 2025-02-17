@@ -9,6 +9,8 @@ export default async function UserProfilePage({ params }) {
   const user = await getUserProfile(user_id);
   const posts = await getUserPosts(user_id);
 
+
+  //TODO: Gestionar los errores con handlingerror
   if (!user) {
     return notFound(); // ⛔ Mostrar página 404 si el usuario no existe
   }
@@ -17,7 +19,7 @@ export default async function UserProfilePage({ params }) {
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
       {/* 🔹 Información del Usuario */}
       <div className="flex items-center gap-4 mb-6">
-        <Image src={user.picture || "/default-avatar.png"} alt="Perfil" width={80} height={80} className="rounded-full" />
+        <Image src={user.picture || "/avatar-default.png"} alt="Perfil" width={80} height={80} className="rounded-full" />
         <div>
           <h2 className="text-2xl font-bold text-black">{user.name}</h2>
           <p className="text-gray-500">{user.email}</p>
