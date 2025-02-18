@@ -1,6 +1,6 @@
 import { auth0 } from "../lib/auth0";
 import { getPosts, getLikes } from "../lib/action";
-import Post from "./post";
+import PostShort from "./post-short";
 
 export default async function PostList() {
   const session = await auth0.getSession();
@@ -11,17 +11,17 @@ export default async function PostList() {
   return (
     <div className="flex flex-col grow items-center gap-16 mt-24">
       {posts.map((post) => (
-         <Post
-         key={post.post_id}
-         post_id={post.post_id}
-         user_id={user_id}  // ✅ Pasamos el usuario autenticado aquí
-         username={post.username}
-         picture={post.picture}
-         content={post.content}
-         url={post.url}
-         created_at={post.created_at}  // ✅ Enviar `created_at` al componente
-         likeCount={post.num_likes} //REVISAR SI LOS LIKES NO FUNCIONAN
-         isLikedInitial={likes.some((like) => like.post_id === post.post_id)}
+         <PostShort
+          key={post.post_id}
+          post_id={post.post_id}
+          user_id={user_id}  // ✅ Pasamos el usuario autenticado aquí
+          username={post.username}
+          picture={post.picture}
+          content={post.content}
+          url={post.url}
+          created_at={post.created_at}  // ✅ Enviar `created_at` al componente
+          likeCount={post.num_likes} //REVISAR SI LOS LIKES NO FUNCIONAN
+          isLikedInitial={likes.some((like) => like.post_id === post.post_id)}
        />
       
       ))}

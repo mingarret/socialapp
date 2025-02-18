@@ -74,35 +74,44 @@ export async function getPost(post_id) {
     `).rows;
 }
 
-// Obtener comentarios de un post
 export async function getComments(post_id) {
-    return (await sql`
-      SELECT sa_comments.comment_id, sa_comments.content, sa_comments.created_at, 
-             sa_users.username, sa_users.picture 
-      FROM sa_comments 
-      JOIN sa_users ON sa_comments.user_id = sa_users.user_id
-      WHERE sa_comments.post_id = ${post_id}
-      ORDER BY sa_comments.created_at DESC
-    `).rows;
-  }
+  return (await sql`
+    SELECT sa_comments.comment_id, sa_comments.content, sa_users.username, sa_users.picture 
+    FROM sa_comments 
+    JOIN sa_users ON sa_comments.user_id = sa_users.user_id
+    WHERE sa_comments.post_id = ${post_id}
+    ORDER BY sa_comments.created_at DESC
+  `).rows;
+}
+
   
   // Insertar un nuevo comentario
-  export async function insertComment(post_id, user_id, content) {
+  export async function insertComment(post_id, user_id, content, parent_id = null) {
     await sql`
-      INSERT INTO sa_comments (post_id, user_id, content)
-      VALUES (${post_id}, ${user_id}, ${content})
+      INSERT INTO sa_comments (post_id, user_id, content, parent_id)
+      VALUES (${post_id}, ${user_id}, ${content}, ${parent_id})
     `;
   }
-
-  export async function getProfile(user_name) {
-    return (await sql`
-    SELECT 
-      user_id,
-      username,
-      name,
-      picture,
-      email
+  
+  // ✅ Obtener perfil de un usuario
+export async function getProfile(user_name) {
+  const result = await sql`
+    SELECT user_id, username, name, picture, email
     FROM sa_users
     WHERE username = ${user_name}
-  `).rows[0];
-  }
+  `;
+
+  return result.rows.length > 0 ? result.rows[0] : null; // ✅ Devuelve `null` si no se encuentra el usuario
+}
+
+  // ✅ Función para buscar usuarios en la base de datos
+export async function searchUsers(query) {
+  return (
+    await sql`
+      SELECT user_id, username, name, picture
+      FROM sa_users
+      WHERE username ILIKE ${"%" + query + "%"}
+      LIMIT 5
+    `
+  ).rows;
+}

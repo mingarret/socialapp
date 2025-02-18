@@ -5,6 +5,10 @@ import { redirect } from "next/navigation";
 import { sql } from "@vercel/postgres";
 import { put } from "@vercel/blob";
 import { auth0 } from "./auth0";
+import { searchUsers } from "./data";
+import { insertComment, getComments } from "./data";
+import { getComments as fetchComments } from "./data"; // ✅ Importa la única función válida
+
 
 export async function createPost(formData) {
   const session = await auth0.getSession();
@@ -108,39 +112,6 @@ export async function getLikes(user_id) {
   return rows;
 }
 
-// ✅ Función para obtener los comentarios de un post
-export async function getComments(post_id) {
-  try {
-    const comments = await sql`
-      SELECT sa_comments.content, sa_users.username, sa_users.picture 
-      FROM sa_comments
-      JOIN sa_users ON sa_comments.user_id = sa_users.user_id
-      WHERE sa_comments.post_id = ${post_id}
-      ORDER BY sa_comments.created_at DESC
-    `;
-
-    const count = comments.rows.length; // Contar comentarios
-
-    return { comments: comments.rows, count };
-  } catch (error) {
-    console.error("❌ Error al obtener comentarios:", error);
-    return { comments: [], count: 0 };
-  }
-}
-
-
-// ✅ Función para insertar un nuevo comentario
-export async function insertComment(post_id, user_id, content) {
-  try {
-    await sql`
-      INSERT INTO sa_comments (post_id, user_id, content) 
-      VALUES (${post_id}, ${user_id}, ${content})
-    `;
-  } catch (error) {
-    console.error("❌ Error al insertar comentario:", error);
-  }
-}
-
 export async function searchDatabase(query) {
   if (!query) return { users: [], posts: [] };
 
@@ -198,3 +169,113 @@ export async function getUserLikes(userId) {
     WHERE sa_likes.user_id = ${userId}
   `).rows;
 }
+
+export async function handleSearchUsers(query) {
+  if (!query.trim()) return []; // ✅ Si la búsqueda está vacía, no hacer nada
+
+  try {
+    const users = await searchUsers(query);
+
+    if (!users || users.length === 0) {
+      console.warn("⚠️ No se encontraron usuarios.");
+      return [];
+    }
+
+    return users.map(user => ({
+      user_id: user.user_id, // ✅ Aseguramos que `user_id` está presente
+      username: user.username,
+      name: user.name,
+      picture: user.picture
+    }));
+  } catch (error) {
+    console.error("❌ Error en la búsqueda de usuarios:", error);
+    return [];
+  }
+}
+
+
+export async function handleGetProfile(user_name) {
+  if (!user_name) throw new Error("❌ Username inválido");
+
+  try {
+    const user = await getProfile(user_name);
+
+    if (!user) {
+      console.warn(`⚠️ Usuario no encontrado: ${user_name}`);
+      return null;
+    }
+
+    return user;
+  } catch (error) {
+    console.error("❌ Error al obtener el perfil:", error);
+    return null;
+  }
+}
+
+
+// ✅ Obtener comentarios de un post
+export async function handleGetComments(post_id) {
+  if (!post_id) throw new Error("❌ Post ID inválido");
+
+  try {
+    const comments = await sql`
+      SELECT 
+        c.comment_id, c.content, c.parent_id,
+        u.username, u.picture 
+      FROM sa_comments c
+      JOIN sa_users u ON c.user_id = u.user_id
+      WHERE c.post_id = ${post_id}
+      ORDER BY c.parent_id NULLS FIRST, c.comment_id ASC
+    `;
+
+    // 🔹 Agrupar respuestas en cascada
+    const commentMap = {};
+    comments.rows.forEach(comment => {
+      comment.replies = [];
+      commentMap[comment.comment_id] = comment;
+    });
+
+    const rootComments = [];
+    comments.rows.forEach(comment => {
+      if (comment.parent_id) {
+        commentMap[comment.parent_id]?.replies.push(comment);
+      } else {
+        rootComments.push(comment);
+      }
+    });
+
+    return rootComments;
+  } catch (error) {
+    console.error("❌ Error al obtener comentarios:", error);
+    return [];
+  }
+}
+
+
+// ✅ Insertar un comentario
+export async function addComment(formData) {
+  const session = await auth0.getSession();
+  if (!session || !session.user) {
+    throw new Error("Usuario no autenticado");
+  }
+
+  const { user_id } = session.user;
+
+  const post_id = formData.get("post_id");
+  const content = formData.get("content");
+  const parent_id = formData.get("parent_id") || null;
+
+  // 🔹 Validación de datos
+  if (!post_id || !user_id || !content.trim()) {
+    throw new Error("❌ Datos inválidos para comentar");
+  }
+
+  try {
+    await insertComment(post_id, user_id, content, parent_id);
+  } catch (error) {
+    console.error("❌ Error al insertar comentario:", error);
+    throw new Error("❌ No se pudo insertar el comentario");
+  }
+}
+
+
