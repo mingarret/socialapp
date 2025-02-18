@@ -8,11 +8,24 @@ import LikeButton from "./like-button";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
-export default function Post({ post_id, user_id, username, picture, content, url, likeCount, commentCount, isLikedInitial, created_at }) {
-  const [isImageOpen, setIsImageOpen] = useState(false); // ✅ Estado del modal de imagen ampliada
+export default function Post({ 
+  post_id, 
+  user_id, 
+  username, 
+  picture, 
+  content, 
+  url, 
+  likeCount, 
+  commentCount, // ✅ Ahora sí se mostrará correctamente
+  isLikedInitial, 
+  created_at 
+}) {
+  const [isImageOpen, setIsImageOpen] = useState(false);
 
   // ✅ Formato de fecha legible
-  const formattedDate = created_at ? formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: es }) : "Fecha desconocida";
+  const formattedDate = created_at 
+    ? formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: es }) 
+    : "Fecha desconocida";
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-2xl bg-white p-6 rounded-xl shadow-2xl mb-12">
@@ -40,8 +53,9 @@ export default function Post({ post_id, user_id, username, picture, content, url
         {/* 🔗 Redirigir a comentarios a pantalla completa */}
         <Link href={`/post/${post_id}`} className="flex items-center gap-1 text-sm font-semibold text-gray-700 hover:text-blue-500 transition">
           <ChatBubbleLeftIcon className="h-7 w-7" />
-          {commentCount} comentarios
+          {commentCount > 0 ? `${commentCount} comentarios` : "Sin comentarios"}
         </Link>
+
       </div>
 
       {/* 📝 Descripción del post */}

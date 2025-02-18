@@ -1,5 +1,7 @@
 import { sql } from "@vercel/postgres";
 
+
+// Insertar un nuevo like en la base de datos 
 export async function getPosts() {
     return (await sql`
       SELECT 
@@ -18,6 +20,7 @@ export async function getPosts() {
     `).rows;
   }
 
+  // Insertar un nuevo like en la base de datos 
   export async function getPostsOfUser(user_id) {
     return (await sql`
       SELECT 
@@ -37,6 +40,7 @@ export async function getPosts() {
     `).rows;
   }
 
+// Insertar un nuevo like en la base de datos   
 export async function getPost(post_id) {
     return (await sql`
     SELECT 
@@ -56,7 +60,7 @@ export async function getPost(post_id) {
     `).rows;
 }
 
-  
+  // Insertar un nuevo like en la base de datos 
   export async function getUsersWhoLiked(post_id) {
     const { rows } = await sql`
       SELECT sa_users.username, sa_users.picture 
@@ -68,24 +72,52 @@ export async function getPost(post_id) {
     return rows;
   }
 
+
+  // Insertar un nuevo like en la base de datos 
   export async function getLike(user_id, post_id) {
     return (await sql`
         SELECT post_id FROM sa_likes WHERE user_id = ${user_id} AND post_id=${post_id}
     `).rows;
 }
 
+
+// ✅ Obtener comentarios y sus respuestas en cascada
 export async function getComments(post_id) {
-  return (await sql`
-    SELECT sa_comments.comment_id, sa_comments.content, sa_users.username, sa_users.picture 
-    FROM sa_comments 
-    JOIN sa_users ON sa_comments.user_id = sa_users.user_id
-    WHERE sa_comments.post_id = ${post_id}
-    ORDER BY sa_comments.created_at DESC
-  `).rows;
+  const comments = (await sql`
+    SELECT 
+      c.comment_id, c.content, c.parent_id,
+      u.username, u.picture 
+    FROM sa_comments c
+    JOIN sa_users u ON c.user_id = u.user_id
+    WHERE c.post_id = ${post_id}
+    ORDER BY c.parent_id NULLS FIRST, c.comment_id ASC
+  `).rows || [];  // ✅ Asegura que siempre es un array
+  
+
+  // 🔄 Convertir los comentarios en estructura anidada
+  const commentMap = new Map();
+
+  comments.forEach(comment => {
+    comment.replies = [];
+    commentMap.set(comment.comment_id, comment);
+  });
+
+  const rootComments = [];
+
+  comments.forEach(comment => {
+    if (comment.parent_id) {
+      commentMap.get(comment.parent_id)?.replies.push(comment);
+    } else {
+      rootComments.push(comment);
+    }
+  });
+
+  return rootComments;
 }
 
+
   
-  // Insertar un nuevo comentario
+  // Insertar un nuevo comentario en la base de datos
   export async function insertComment(post_id, user_id, content, parent_id = null) {
     await sql`
       INSERT INTO sa_comments (post_id, user_id, content, parent_id)
@@ -93,7 +125,7 @@ export async function getComments(post_id) {
     `;
   }
   
-  // ✅ Obtener perfil de un usuario
+  // ✅ Obtener perfil de un usuario por su nombre de usuario
 export async function getProfile(user_name) {
   const result = await sql`
     SELECT user_id, username, name, picture, email
@@ -104,7 +136,7 @@ export async function getProfile(user_name) {
   return result.rows.length > 0 ? result.rows[0] : null; // ✅ Devuelve `null` si no se encuentra el usuario
 }
 
-  // ✅ Función para buscar usuarios en la base de datos
+  // ✅ Función para buscar usuarios en la base de datos por su nombre de usuario
 export async function searchUsers(query) {
   return (
     await sql`
@@ -115,3 +147,20 @@ export async function searchUsers(query) {
     `
   ).rows;
 }
+
+// ✅ Obtener los posts con el número de comentarios asociados
+export async function getPostsWithCommentCount() {
+  return (await sql`
+    SELECT 
+      p.post_id, 
+      p.content, 
+      p.url, 
+      p.user_id, 
+      COUNT(c.comment_id) AS comment_count
+    FROM sa_posts p
+    LEFT JOIN sa_comments c ON p.post_id = c.post_id
+    GROUP BY p.post_id
+    ORDER BY p.created_at DESC;
+  `).rows; // ✅ Devuelve los resultados correctamente
+}
+

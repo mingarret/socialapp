@@ -6,8 +6,9 @@ import { sql } from "@vercel/postgres";
 import { put } from "@vercel/blob";
 import { auth0 } from "./auth0";
 import { searchUsers } from "./data";
-import { insertComment, getComments } from "./data";
+import { insertComment } from "./data";
 import { getComments as fetchComments } from "./data"; // ✅ Importa la única función válida
+import { getPostsWithCommentCount } from "./data";
 
 
 export async function createPost(formData) {
@@ -170,6 +171,8 @@ export async function getUserLikes(userId) {
   `).rows;
 }
 
+
+// 🔹 Obtiene los seguidores del usuario 
 export async function handleSearchUsers(query) {
   if (!query.trim()) return []; // ✅ Si la búsqueda está vacía, no hacer nada
 
@@ -194,6 +197,7 @@ export async function handleSearchUsers(query) {
 }
 
 
+// ✅ Obtener perfil de un usuario por su nombre de usuario
 export async function handleGetProfile(user_name) {
   if (!user_name) throw new Error("❌ Username inválido");
 
@@ -228,6 +232,7 @@ export async function handleGetComments(post_id) {
       ORDER BY c.parent_id NULLS FIRST, c.comment_id ASC
     `;
 
+
     // 🔹 Agrupar respuestas en cascada
     const commentMap = {};
     comments.rows.forEach(comment => {
@@ -252,30 +257,57 @@ export async function handleGetComments(post_id) {
 }
 
 
-// ✅ Insertar un comentario
-export async function addComment(formData) {
-  const session = await auth0.getSession();
-  if (!session || !session.user) {
-    throw new Error("Usuario no autenticado");
-  }
-
-  const { user_id } = session.user;
-
-  const post_id = formData.get("post_id");
-  const content = formData.get("content");
-  const parent_id = formData.get("parent_id") || null;
-
-  // 🔹 Validación de datos
-  if (!post_id || !user_id || !content.trim()) {
-    throw new Error("❌ Datos inválidos para comentar");
-  }
-
-  try {
-    await insertComment(post_id, user_id, content, parent_id);
-  } catch (error) {
-    console.error("❌ Error al insertar comentario:", error);
-    throw new Error("❌ No se pudo insertar el comentario");
-  }
+// ✅ Insertar un like  
+export async function handleGetPosts() {
+  const posts = await getPostsWithCommentCount();
+  return posts.rows;
 }
 
 
+export async function addComment(formData) {
+  const session = await auth0.getSession();
+  if (!session?.user) throw new Error("❌ Usuario no autenticado");
+
+  const user_id = session.user.user_id;
+  const post_id = formData.get("post_id");
+  const content = formData.get("content")?.trim(); // 🔹 Evita espacios en blanco
+  const parent_id = formData.get("parent_id") || null;
+
+  // ✅ Depuración: Verificar los valores antes de la inserción
+  console.log("🟢 Insertando comentario con:");
+  console.log("   📝 Post ID:", post_id);
+  console.log("   👤 User ID:", user_id);
+  console.log("   💬 Contenido:", content);
+  console.log("   🔗 Parent ID:", parent_id);
+
+  // 🔴 Validaciones estrictas para evitar inserciones incorrectas
+  if (!post_id) throw new Error("❌ Error: Post ID inválido");
+  if (!user_id) throw new Error("❌ Error: Usuario no autenticado");
+  if (!content) throw new Error("❌ Error: Comentario vacío");
+
+  try {
+    // ✅ Insertar comentario en la BD
+    const result = await sql`
+      INSERT INTO sa_comments (post_id, user_id, content, parent_id)
+      VALUES (${post_id}, ${user_id}, ${content}, ${parent_id})
+      RETURNING comment_id
+    `;
+
+    console.log("✅ Comentario insertado con ID:", result.rows[0].comment_id);
+
+    // ✅ Actualizar el número de comentarios en `sa_posts`
+    await sql`
+    UPDATE sa_posts 
+    SET comment_count = (SELECT COUNT(*) FROM sa_comments WHERE post_id = ${post_id})
+    WHERE post_id = ${post_id}
+  `;
+  
+
+    console.log("🔄 Contador de comentarios actualizado");
+
+    return { success: true, comment_id: result.rows[0].comment_id }; // 🔹 Devolver el ID del comentario insertado
+  } catch (error) {
+    console.error("❌ Error al agregar comentario:", error);
+    throw new Error("❌ Error al insertar el comentario en la base de datos");
+  }
+}

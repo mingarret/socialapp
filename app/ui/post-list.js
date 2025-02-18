@@ -21,6 +21,7 @@ export default async function PostList() {
           url={post.url}
           created_at={post.created_at}  // ✅ Enviar `created_at` al componente
           likeCount={post.num_likes} //REVISAR SI LOS LIKES NO FUNCIONAN
+          commentCount={post.commentcount} // ✅ Asegúrate de que la "C" coincide con lo devuelto en SQL
           isLikedInitial={likes.some((like) => like.post_id === post.post_id)}
        />
       
