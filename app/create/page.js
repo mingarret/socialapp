@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createPost } from "../lib/action";
 import Image from "next/image";
+import Skeleton from "../ui/Skeleton"; // 🔹 Importamos Skeleton Loader
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -11,9 +12,16 @@ export default function CreatePostPage() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("/preview1.jpg"); // Imagen de preview por defecto
   const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
 
-  // Función para manejar el drop de la imagen
+  // ✅ Simular carga inicial de la página (opcional)
+  useEffect(() => {
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 1000); // Simula carga inicial
+  }, []);
+
+  // 🔄 Manejar arrastrar y soltar imagen
   const handleDrop = (event) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
@@ -23,7 +31,7 @@ export default function CreatePostPage() {
     }
   };
 
-  // Función para seleccionar la imagen manualmente
+  // 🔄 Manejar selección de imagen
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -32,7 +40,7 @@ export default function CreatePostPage() {
     }
   };
 
-  // Función para manejar el envío del formulario
+  // ✅ Manejo de envío del post
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -41,6 +49,7 @@ export default function CreatePostPage() {
       return;
     }
 
+    setIsLoading(true);
     const formData = new FormData();
     formData.append("media", image);
     formData.append("content", content);
@@ -50,11 +59,10 @@ export default function CreatePostPage() {
     setSuccess(true);
     setContent("");
     setImage(null);
-    setPreview("/preview1.jpg"); // Reset a la imagen de preview inicial
+    setPreview("/preview1.jpg");
 
-    // Redirigir después de 1.5 segundos
     setTimeout(() => {
-      router.push("/"); // Cambia la ruta si es necesario
+      router.push("/");
     }, 1500);
   };
 
@@ -69,16 +77,19 @@ export default function CreatePostPage() {
           className="border-2 border-dashed border-gray-400 rounded-lg p-6 text-center cursor-pointer"
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          onClick={() => inputRef.current && inputRef.current.click()} // 👈 Aquí la corrección
+          onClick={() => inputRef.current && inputRef.current.click()}
         >
-
-          <Image
-            src={preview}
-            alt="Preview"
-            width={400}
-            height={400}
-            className="rounded-lg object-cover mx-auto"
-          />
+          {isLoading ? (
+            <Skeleton height="250px" width="100%" className="rounded-lg" />
+          ) : (
+            <Image
+              src={preview}
+              alt="Preview"
+              width={400}
+              height={400}
+              className="rounded-lg object-cover mx-auto"
+            />
+          )}
           <p className="text-gray-500 mt-2">📂 Arrastra una imagen aquí o haz clic para seleccionar</p>
           <input
             type="file"
@@ -94,16 +105,19 @@ export default function CreatePostPage() {
           <label htmlFor="content" className="block mb-2 text-sm font-medium text-black">
             Contenido
           </label>
-          <input
-            name="content"
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full p-2 rounded-lg border bg-white text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            placeholder="Escribe algo sobre tu imagen..."
-          />
+          {isLoading ? (
+            <Skeleton height="40px" width="100%" className="rounded-lg" />
+          ) : (
+            <input
+              name="content"
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full p-2 rounded-lg border bg-white text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              placeholder="Escribe algo sobre tu imagen..."
+            />
+          )}
         </div>
-
 
         {/* ✅ Mensaje de éxito */}
         {success && (
@@ -114,19 +128,28 @@ export default function CreatePostPage() {
 
         {/* Botones */}
         <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="bg-slate-500 text-white py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors"
-          >
-            Publicar
-          </button>
+          {isLoading ? (
+            <>
+              <Skeleton height="40px" width="45%" className="rounded-lg" />
+              <Skeleton height="40px" width="45%" className="rounded-lg" />
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="bg-slate-500 text-white py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors"
+              >
+                Publicar
+              </button>
+            </>
+          )}
         </div>
       </form>
     </div>

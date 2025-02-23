@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChatBubbleLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import LikeButton from "./like-button";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { addComment, handleGetComments } from "../lib/action"; // ✅ Importar función para obtener comentarios
+import { addComment, handleGetComments } from "../lib/action";
+import Skeleton from "../ui/Skeleton"; // 🔹 Importamos Skeleton
 
 export default function Post({ 
   post_id, 
@@ -22,7 +23,7 @@ export default function Post({
   comments = [],
   created_at 
 }) {
-  const [isImageOpen, setIsImageOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentCommentCount, setCurrentCommentCount] = useState(commentCount);
   const [commentList, setCommentList] = useState(comments);
 
@@ -32,33 +33,33 @@ export default function Post({
     : "Fecha desconocida";
 
   // 🔄 Obtener comentarios actualizados después de agregar uno
-    useEffect(() => {
-      const fetchComments = async () => {
-        try {
-          const updatedComments = await handleGetComments(post_id); // 🔹 Asegúrate de que usa `handleGetComments`
-          setCommentList(updatedComments);
-        } catch (error) {
-          console.error("❌ Error al obtener comentarios:", error);
-        }
-      };
-      fetchComments();
-    }, [post_id]);
-
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const updatedComments = await handleGetComments(post_id);
+        setCommentList(updatedComments);
+      } catch (error) {
+        console.error("❌ Error al obtener comentarios:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchComments();
+  }, [post_id]);
 
   // ✅ Manejo de nuevos comentarios
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
-    await addComment(formData); // 🔄 Guardar comentario en la BD
+    await addComment(formData);
     setCurrentCommentCount((prev) => prev + 1);
 
-    // 🔄 Actualizar los comentarios en la UI sin necesidad de refrescar
     const updatedComments = await handleGetComments(post_id);
     setCommentList(updatedComments);
-    setCurrentCommentCount(updatedComments.length); // ✅ Asegurar que el contador se actualice correctamente
+    setCurrentCommentCount(updatedComments.length);
 
-    event.target.reset(); // ✅ Limpiar el formulario
+    event.target.reset();
   };
 
   return (
@@ -66,16 +67,30 @@ export default function Post({
       
       {/* 🧑‍💻 Usuario */}
       <div className="flex items-center gap-3">
-        <Image src={picture || "/default-avatar.png"} alt={username} width={40} height={40} className="rounded-full" />
-        <div className="flex flex-col">
-          <span className="font-bold text-sm text-black">{username}</span>
-          <span className="text-xs text-gray-500">{formattedDate}</span>
-        </div>
+        {isLoading ? (
+          <>
+            <Skeleton height="40px" width="40px" className="rounded-full" />
+            <div className="flex flex-col">
+              <Skeleton width="120px" height="16px" />
+              <Skeleton width="90px" height="12px" />
+            </div>
+          </>
+        ) : (
+          <>
+            <Image src={picture || "/default-avatar.png"} alt={username} width={40} height={40} className="rounded-full" />
+            <div className="flex flex-col">
+              <span className="font-bold text-sm text-black">{username}</span>
+              <span className="text-xs text-gray-500">{formattedDate}</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 📸 Imagen del post */}
-      {url && (
-        <div className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform" onClick={() => setIsImageOpen(true)}>
+      {isLoading ? (
+        <Skeleton height="300px" className="w-full" />
+      ) : url && (
+        <div className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform">
           <Image src={url} alt="Post" width={500} height={500} className="rounded-lg object-cover" />
         </div>
       )}
@@ -83,18 +98,24 @@ export default function Post({
       {/* ❤️ Iconos de interacción */}
       <div className="flex justify-between items-center px-2">
         <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
-        
-        {/* 🔗 Redirigir a comentarios */}
-        <Link href={`/post/${post_id}/comments`} className="flex items-center gap-1 text-sm font-semibold text-gray-700 hover:text-blue-500 transition">
-          <ChatBubbleLeftIcon className="h-7 w-7" />
-          {currentCommentCount > 0 ? `${currentCommentCount} comentarios` : "Sin comentarios"}
-        </Link>
+        {isLoading ? (
+          <Skeleton width="100px" height="16px" />
+        ) : (
+          <Link href={`/post/${post_id}/comments`} className="flex items-center gap-1 text-sm font-semibold text-gray-700 hover:text-blue-500 transition">
+            <ChatBubbleLeftIcon className="h-7 w-7" />
+            {currentCommentCount > 0 ? `${currentCommentCount} comentarios` : "Sin comentarios"}
+          </Link>
+        )}
       </div>
 
       {/* 📝 Descripción del post */}
-      <p className="text-sm text-black">
-        <span className="font-bold">{username}</span> {content}
-      </p>
+      {isLoading ? (
+        <Skeleton height="60px" className="w-full" />
+      ) : (
+        <p className="text-sm text-black">
+          <span className="font-bold">{username}</span> {content}
+        </p>
+      )}
 
       {/* 📝 Formulario para agregar comentarios */}
       <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
@@ -110,7 +131,12 @@ export default function Post({
 
       {/* 📜 Lista de comentarios en cascada */}
       <div className="mt-6">
-        {commentList.length > 0 ? (
+        {isLoading ? (
+          <>
+            <Skeleton height="80px" className="w-full" />
+            <Skeleton height="80px" className="w-full" />
+          </>
+        ) : commentList.length > 0 ? (
           commentList.map((comment) => (
             <CommentItem key={comment.comment_id} comment={comment} post_id={post_id} />
           ))
@@ -128,7 +154,7 @@ function CommentItem({ comment, post_id }) {
     event.preventDefault();
     const formData = new FormData(event.target);
 
-    await addComment(formData); // 🔄 Guardar respuesta en la BD
+    await addComment(formData);
     event.target.reset();
   };
 

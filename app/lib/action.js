@@ -113,6 +113,7 @@ export async function getLikes(user_id) {
   return rows;
 }
 
+// Funcion para obtener los comentarios de un post
 export async function searchDatabase(query) {
   if (!query) return { users: [], posts: [] };
 
@@ -136,13 +137,24 @@ export async function searchDatabase(query) {
 
 //TODO: los selects van en principio en el data.js
 
-// 🔹 Obtiene información del usuario autenticado
-export async function getUserProfile() {
-  const session = await auth0.getSession();
-  if (!session?.user?.email) return null; // Si no hay usuario autenticado, retorna null
+// ✅ Obtener perfil del usuario (puede ser el logueado o un usuario buscado)
+export async function getUserProfile(user_id = null) {
+  if (!user_id) {
+    // Si no se pasa un `user_id`, obtenemos el usuario logueado
+    const session = await auth0.getSession();
+    if (!session?.user) return null;
+    user_id = session.user.user_id;
+  }
 
-  const result = await sql`SELECT * FROM sa_users WHERE email = ${session.user.email} LIMIT 1`;
-  return result.rows[0];
+  // 🔹 Buscar el usuario en la base de datos
+  const result = await sql`
+    SELECT user_id, username, email, picture 
+    FROM sa_users
+    WHERE user_id = ${user_id}
+    LIMIT 1;
+  `;
+
+  return result.rows[0] || null;
 }
 
 
