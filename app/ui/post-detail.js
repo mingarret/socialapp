@@ -31,11 +31,10 @@ export default function Post({
     : "Fecha desconocida";
 
   return (
-    
-    <div className="flex flex-col gap-6 w-full max-w-2xl bg-white text-black p-6 rounded-xl shadow-2xl mb-12">
+    <div className="flex flex-col gap-6 w-full max-w-2xl bg-white text-black p-6 rounded-xl shadow-2xl mb-12 md:mx-auto">
       
       {/* 🧑‍💻 Usuario */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         {isLoading ? (
           <>
             <Skeleton height="40px" width="40px" className="rounded-full" />
@@ -46,7 +45,13 @@ export default function Post({
           </>
         ) : (
           <>
-            <Image src={picture || "/default-avatar.png"} alt={username} width={40} height={40} className="rounded-full" />
+            <Image 
+              src={picture || "/default-avatar.png"} 
+              alt={username} 
+              width={40} 
+              height={40} 
+              className="rounded-full object-cover"
+            />
             <div className="flex flex-col">
               <span className="font-bold text-sm text-black">{username}</span>
               <span className="text-xs text-gray-500">{formattedDate}</span>
@@ -60,12 +65,18 @@ export default function Post({
         <Skeleton height="300px" className="w-full" />
       ) : url && (
         <div className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform">
-          <Image src={url} alt="Post" width={500} height={500} className="rounded-lg object-cover" />
+          <Image 
+            src={url} 
+            alt="Post" 
+            width={500} 
+            height={500} 
+            className="rounded-lg object-cover w-full max-w-full"
+          />
         </div>
       )}
 
       {/* ❤️ Iconos de interacción */}
-      <div className="flex justify-between items-center px-2">
+      <div className="flex justify-between items-center px-2 flex-wrap">
         <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
 
         {isLoading ? (
@@ -77,7 +88,6 @@ export default function Post({
           </Link>
         )}
       </div>
-
 
       {/* 📝 Descripción del post */}
       {isLoading ? (
@@ -131,8 +141,14 @@ function CommentItem({ comment, post_id }) {
 
   return (
     <div className="border-l-4 border-gray-300 pl-4 mb-4">
-      <div className="flex items-center gap-3">
-        <Image src={comment.picture || "/default-avatar.png"} alt="Avatar" width={30} height={30} className="rounded-full" />
+      <div className="flex items-center gap-3 flex-wrap">
+        <Image 
+          src={comment.picture || "/default-avatar.png"} 
+          alt="Avatar" 
+          width={30} 
+          height={30} 
+          className="rounded-full object-cover"
+        />
         <div>
           <p className="font-bold text-sm">{comment.username}</p>
           <p className="text-gray-700">{comment.content}</p>

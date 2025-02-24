@@ -2,20 +2,28 @@ import { getUserPosts, getUserProfile } from "@/app/lib/action";
 import Image from "next/image";
 import Skeleton from "@/app/ui/Skeleton";
 
-export default async function PostsPage() {
-  const profile = await getUserProfile();
-  const posts = await getUserPosts(profile.user_id);
+export default async function PostsPage({ params }) {
+  const { user_id } = params;
+  const posts = await getUserPosts(user_id);
 
   return (
     <div className="grid grid-cols-3 gap-6">
       {!posts ? (
-        [...Array(6)].map((_, i) => <Skeleton key={i} height="200px" className="rounded-lg" />)
+        [...Array(6)].map((_, i) => <Skeleton key={i} height="250px" className="rounded-lg" />)
       ) : posts.length > 0 ? (
         posts.map((post) => (
-          <Image key={post.post_id} src={post.url} alt="Post" width={200} height={200} className="rounded-lg" />
+          <div key={post.post_id} className="p-4 border rounded-lg bg-gray-100 flex flex-col items-center justify-between h-[250px]">
+            <Image 
+              src={post.url} 
+              alt="Post" 
+              width={150} 
+              height={100} 
+              className="rounded-lg object-cover"
+            />
+          </div>
         ))
       ) : (
-        <p className="text-gray-500">No has publicado nada aún.</p>
+        <p className="text-gray-500">No ha publicado nada aún.</p>
       )}
     </div>
   );

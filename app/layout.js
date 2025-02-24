@@ -2,9 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./ui/nav-bar";
 import { auth0 } from "./lib/auth0";
-import Link from "next/link";
 import LandingPage from "./landing/page"; // 🏠 Importar la Landing Page
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,28 +27,33 @@ export default async function RootLayout({ children }) {
       <body className="antialiased flex h-screen bg-gray-900 text-white">
         {session ? (
           <>
-            {/* ✅ Navbar flotante más ancho */}
+            {/* ✅ Navbar responsive */}
             <Navbar session={session} />
 
-            {/* ✅ Contenido principal con más margen */}
-            <main className="flex-1 flex flex-col items-center bg-transparent text-white min-h-screen p-6">
+            {/* ✅ Contenido principal responsivo */}
+            <main className="flex-1 flex flex-col items-center bg-transparent text-white min-h-screen p-4 md:p-6">
               {children}
             </main>
           </>
         ) : (
-          /* 🌍 Landing Page Minimalista */
-          <div className="flex w-full h-screen">
-            {/* ✅ Sección Izquierda con el Navbar */}
-            <div className="w-1/3 bg-gray-950 p-10 flex flex-col justify-center items-center">
-              <LandingPage /> {/* 📌 Aquí iría el componente de Landing */}
+          /* 🌍 Landing Page con diseño adaptable */
+          <div className="flex flex-col md:flex-row w-full h-screen">
+            {/* ✅ Sección Izquierda con el Navbar (oculta en móvil) */}
+            <div className="hidden md:flex md:w-1/3 bg-gray-950 p-10 flex-col justify-center items-center">
+              <LandingPage />
             </div>
 
             {/* ✅ Sección Derecha con el mensaje inspirador */}
-            <div className="flex-1 flex flex-col justify-center items-center text-center text-white px-10">
-              <h1 className="text-4xl font-bold">🌍 Comparte tus momentos con el mundo</h1>
+            <div className="flex-1 flex flex-col justify-center items-center text-center text-white px-6 md:px-10">
+              <h1 className="text-3xl md:text-4xl font-bold">🌍 Comparte tus momentos con el mundo</h1>
               <p className="mt-4 text-lg text-gray-400">
                 Conéctate con amigos y descubre nuevas historias cada día.
               </p>
+
+              {/* ✅ Botón de login centrado en móviles */}
+              <div className="mt-6 md:hidden">
+                <LandingPage />
+              </div>
             </div>
           </div>
         )}
@@ -58,4 +61,3 @@ export default async function RootLayout({ children }) {
     </html>
   );
 }
-

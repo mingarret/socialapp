@@ -1,3 +1,3 @@
 export default async () => {
-    return <h1 className="text-black">Perfil base</h1>
+    return <h1 className="text-black"></h1>
 }

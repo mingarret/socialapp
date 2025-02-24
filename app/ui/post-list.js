@@ -14,7 +14,7 @@ export default async function PostList() {
          <PostShort
           key={post.post_id}
           post_id={post.post_id}
-          user_id={user_id}  // ✅ Pasamos el usuario autenticado aquí
+          user_id={post.user_id}  // ✅ CORREGIDO: Ahora es el usuario que publicó el post
           username={post.username}
           picture={post.picture}
           content={post.content}

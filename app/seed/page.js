@@ -6,7 +6,7 @@ export default async function Seed() {
 
     //await resetPosts();
     //await resetUsers();
-    await resetComments();
+    //await resetComments();
     //await resetLikes();
 
     console.log("✅ Seed completado correctamente.");

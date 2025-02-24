@@ -166,7 +166,11 @@ export async function getUserPosts(userId) {
 // 🔹 Obtiene los comentarios del usuario
 export async function getUserComments(userId) {
   return (await sql`
-    SELECT sa_comments.comment_id, sa_comments.content, sa_posts.content AS post_title
+    SELECT 
+      sa_comments.comment_id, 
+      sa_comments.content, 
+      sa_posts.content AS post_title, 
+      sa_posts.url AS post_image  -- 🔹 Agregamos la URL de la imagen
     FROM sa_comments
     JOIN sa_posts ON sa_comments.post_id = sa_posts.post_id
     WHERE sa_comments.user_id = ${userId}

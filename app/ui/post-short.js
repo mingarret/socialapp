@@ -45,10 +45,10 @@ export default function Post({
   }, [post_id]);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-2xl bg-white p-6 rounded-xl shadow-2xl mb-12">
+    <div className="flex flex-col gap-6 w-full max-w-2xl bg-white p-6 rounded-xl shadow-2xl mb-12 sm:max-w-full">
       
       {/* 🧑‍💻 Usuario */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         {isLoading ? (
           <>
             <Skeleton height="40px" width="40px" className="rounded-full" />
@@ -59,9 +59,14 @@ export default function Post({
           </>
         ) : (
           <>
-            <Image src={picture || "/default-avatar.png"} alt={username || "Usuario"} width={40} height={40} className="rounded-full" />
+            <Image 
+              src={picture || "/default-avatar.png"} 
+              alt={username || "Usuario"} 
+              width={40} 
+              height={40} 
+              className="rounded-full"
+            />
             <div className="flex flex-col">
-              {/* 🔹 Enlace al perfil del usuario */}
               <Link href={`/profile/${user_id}`} className="font-bold text-sm text-black hover:text-blue-500 transition">
                 {username}
               </Link>
@@ -71,17 +76,23 @@ export default function Post({
         )}
       </div>
 
-      {/* 📸 Imagen del post con modal ampliado */}
+      {/* 📸 Imagen del post */}
       {isLoading ? (
         <Skeleton width="500px" height="300px" className="w-full" />
       ) : url && (
         <div className="overflow-hidden rounded-lg cursor-zoom-in hover:scale-105 transition-transform">
-          <Image src={url} alt="Post" width={500} height={500} className="rounded-lg object-cover" />
+          <Image 
+            src={url} 
+            alt="Post" 
+            width={500} 
+            height={500} 
+            className="rounded-lg object-cover w-full max-h-[400px] sm:max-h-[300px]"
+          />
         </div>
       )}
 
       {/* ❤️ Iconos de interacción */}
-      <div className="flex justify-between items-center px-2">
+      <div className="flex justify-between items-center px-2 flex-wrap">
         <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
 
         {isLoading ? (
@@ -98,7 +109,7 @@ export default function Post({
       {isLoading ? (
         <Skeleton height="60px" className="w-full" />
       ) : (
-        <p className="text-sm text-black">
+        <p className="text-sm text-black break-words">
           <span className="font-bold">{username}</span> {content}
         </p>
       )}

@@ -15,9 +15,13 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "8tt3ypdflkc4itj6.public.blob.vercel-storage.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com", // ✅ Agregamos el dominio de Google User Content
       }
     ],
-    domains: ["randomuser.me", "via.placeholder.com"], // ✅ Agregamos los dominios permitidos
+    domains: ["randomuser.me", "via.placeholder.com", "lh3.googleusercontent.com"], // ✅ También lo agregamos aquí por seguridad
   },
   reactStrictMode: true,
   experimental: {
