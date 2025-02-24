@@ -19,6 +19,7 @@ export default async function PostPage({ params }) {
   const post = postData[0];
   const like = await getLike(user_id, post_id);
   const comments = await getComments(post_id);
+  const commentCount = comments.length;
 
   return (
     <>
@@ -32,6 +33,7 @@ export default async function PostPage({ params }) {
         //likeCount={post.num_likes}
         isLikedInitial={like.length > 0} 
         comments={comments}
+        commentCount={post.comment_count}
       />
     </>
   );

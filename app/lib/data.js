@@ -51,12 +51,13 @@ export async function getPost(post_id) {
         sa_users.username, 
         sa_users.picture,
         sa_posts.created_at,
-        COUNT(sa_likes.user_id) AS num_likes 
+        COUNT(sa_likes.user_id) AS num_likes,
+        sa_posts.comment_count
     FROM sa_posts
     JOIN sa_users USING(user_id) 
     LEFT JOIN sa_likes USING(post_id)
     WHERE post_id = ${post_id}
-    GROUP BY sa_posts.post_id, sa_users.username, sa_users.picture
+    GROUP BY sa_posts.post_id, sa_users.username, sa_users.picture, sa_posts.comment_count
     `).rows;
 }
 

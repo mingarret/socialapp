@@ -23,46 +23,15 @@ export default function Post({
   comments = [],
   created_at 
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentCommentCount, setCurrentCommentCount] = useState(commentCount);
-  const [commentList, setCommentList] = useState(comments);
+  const [isLoading, setIsLoading] = useState(false);
 
   // ✅ Formatear fecha legible
   const formattedDate = created_at 
     ? formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: es }) 
     : "Fecha desconocida";
 
-  // 🔄 Obtener comentarios actualizados después de agregar uno
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const updatedComments = await handleGetComments(post_id);
-        setCommentList(updatedComments);
-      } catch (error) {
-        console.error("❌ Error al obtener comentarios:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchComments();
-  }, [post_id]);
-
-  // ✅ Manejo de nuevos comentarios
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-
-    await addComment(formData);
-    setCurrentCommentCount((prev) => prev + 1);
-
-    const updatedComments = await handleGetComments(post_id);
-    setCommentList(updatedComments);
-    setCurrentCommentCount(updatedComments.length);
-
-    event.target.reset();
-  };
-
   return (
+    
     <div className="flex flex-col gap-6 w-full max-w-2xl bg-white text-black p-6 rounded-xl shadow-2xl mb-12">
       
       {/* 🧑‍💻 Usuario */}
@@ -101,10 +70,10 @@ export default function Post({
         {isLoading ? (
           <Skeleton width="100px" height="16px" />
         ) : (
-          <Link href={`/post/${post_id}/comments`} className="flex items-center gap-1 text-sm font-semibold text-gray-700 hover:text-blue-500 transition">
+          <>
             <ChatBubbleLeftIcon className="h-7 w-7" />
-            {currentCommentCount > 0 ? `${currentCommentCount} comentarios` : "Sin comentarios"}
-          </Link>
+            {commentCount > 0 ? `${commentCount} comentarios` : "Sin comentarios"}
+            </>
         )}
       </div>
 
@@ -118,7 +87,7 @@ export default function Post({
       )}
 
       {/* 📝 Formulario para agregar comentarios */}
-      <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
+      <form action={addComment} className="flex gap-2 mt-4">
         <input type="hidden" name="post_id" value={post_id} />
         <input 
           name="content" 
@@ -136,8 +105,8 @@ export default function Post({
             <Skeleton height="80px" className="w-full" />
             <Skeleton height="80px" className="w-full" />
           </>
-        ) : commentList.length > 0 ? (
-          commentList.map((comment) => (
+        ) : comments.length > 0 ? (
+          comments.map((comment) => (
             <CommentItem key={comment.comment_id} comment={comment} post_id={post_id} />
           ))
         ) : (
