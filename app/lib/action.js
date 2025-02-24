@@ -9,6 +9,7 @@ import { searchUsers } from "./data";
 import { insertComment } from "./data";
 import { getComments as fetchComments } from "./data"; // ✅ Importa la única función válida
 import { getPostsWithCommentCount } from "./data";
+import { deleteComment } from "@/app/lib/data";
 
 
 export async function createPost(formData) {
@@ -325,5 +326,22 @@ export async function addComment(formData) {
   } catch (error) {
     console.error("❌ Error al agregar comentario:", error);
     throw new Error("❌ Error al insertar el comentario en la base de datos");
+  }
+}
+
+// ✅ Acción para eliminar un comentario
+export async function handleDeleteComment(commentId) {
+  const profile = await getUserProfile(); // 🔹 Obtener usuario logeado
+  if (!profile) return { error: "Usuario no autenticado" };
+
+  try {
+    const result = await deleteComment(commentId, profile.user_id);
+    if (result.rowCount === 0) {
+      return { error: "No tienes permiso para eliminar este comentario" };
+    }
+    return { success: "Comentario eliminado correctamente" };
+  } catch (error) {
+    console.error("Error al eliminar comentario:", error);
+    return { error: "Ocurrió un error al eliminar el comentario" };
   }
 }

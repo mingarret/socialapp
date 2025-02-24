@@ -165,3 +165,11 @@ export async function getPostsWithCommentCount() {
   `).rows; // ✅ Devuelve los resultados correctamente
 }
 
+// ✅ Función para eliminar un comentario por su `comment_id`
+export async function deleteComment(commentId, userId) {
+  return await sql`
+    DELETE FROM sa_comments 
+    WHERE comment_id = ${commentId} AND user_id = ${userId}
+    RETURNING *;
+  `;
+}
