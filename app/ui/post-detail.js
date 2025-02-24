@@ -67,15 +67,17 @@ export default function Post({
       {/* ❤️ Iconos de interacción */}
       <div className="flex justify-between items-center px-2">
         <LikeButton post_id={post_id} user_id={user_id} isLikedInitial={isLikedInitial} />
+
         {isLoading ? (
           <Skeleton width="100px" height="16px" />
         ) : (
-          <>
-            <ChatBubbleLeftIcon className="h-7 w-7" />
-            {commentCount > 0 ? `${commentCount} comentarios` : "Sin comentarios"}
-            </>
+          <Link href={`/post/${post_id}`} className="flex items-center gap-x-1 text-sm font-semibold text-gray-700 hover:text-blue-500 transition">
+            <ChatBubbleLeftIcon className="h-5 w-5" />
+            <span>{commentCount > 0 ? `${commentCount} comentarios` : "Sin comentarios"}</span>
+          </Link>
         )}
       </div>
+
 
       {/* 📝 Descripción del post */}
       {isLoading ? (
